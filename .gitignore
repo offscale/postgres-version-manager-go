@@ -1,0 +1,4 @@
+.idea
+*.swp
+postgres-version-manager-go
+bin
