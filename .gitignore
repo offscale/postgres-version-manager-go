@@ -2,3 +2,5 @@
 *.swp
 postgres-version-manager-go
 bin
+
+dist/

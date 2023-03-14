@@ -270,11 +270,11 @@ func main() {
 					if v == "latest" {
 						var version embeddedpostgres.PostgresVersion = POSTGRES_VERSIONS[0]
 						fmt.Printf("latest::installing: %s\n", version)
-						return config_then(version, false, false)
+						return postgresConfigThen(version, false, false)
 					} else if isValidVersion(v) {
 						var version embeddedpostgres.PostgresVersion = embeddedpostgres.PostgresVersion(v)
 						fmt.Printf("        installing: %s\n", version)
-						return config_then(version, false, false)
+						return postgresConfigThen(version, false, false)
 					}
 					return fmt.Errorf("invalid version: %s\n", v)
 				},
@@ -288,11 +288,11 @@ func main() {
 					if v == "latest" {
 						var version embeddedpostgres.PostgresVersion = POSTGRES_VERSIONS[0]
 						fmt.Printf("latest::starting: %s\n", version)
-						return config_then(version, true, false)
+						return postgresConfigThen(version, true, false)
 					} else if isValidVersion(v) {
 						var version embeddedpostgres.PostgresVersion = embeddedpostgres.PostgresVersion(v)
 						fmt.Printf("        starting: %s\n", version)
-						return config_then(version, true, false)
+						return postgresConfigThen(version, true, false)
 					}
 					return fmt.Errorf("invalid version: %s\n", v)
 				},
@@ -306,11 +306,11 @@ func main() {
 					if v == "latest" {
 						var version embeddedpostgres.PostgresVersion = POSTGRES_VERSIONS[0]
 						fmt.Printf("latest::stopping: %s\n", version)
-						return config_then(version, false, true)
+						return postgresConfigThen(version, false, true)
 					} else if isValidVersion(v) {
 						var version embeddedpostgres.PostgresVersion = embeddedpostgres.PostgresVersion(v)
 						fmt.Printf("        stopping: %s\n", version)
-						return config_then(version, false, true)
+						return postgresConfigThen(version, false, true)
 					}
 					return fmt.Errorf("invalid version: %s\n", v)
 				},
@@ -337,7 +337,7 @@ func main() {
 	}
 }
 
-func config_then(version embeddedpostgres.PostgresVersion, start bool, stop bool) error {
+func postgresConfigThen(version embeddedpostgres.PostgresVersion, start bool, stop bool) error {
 	const port uint32 = 5433
 	const database string = "postgres"
 	const username string = "postgres"
@@ -368,9 +368,7 @@ func config_then(version embeddedpostgres.PostgresVersion, start bool, stop bool
 		} else {
 			fmt.Printf("RDBMS_URI=\"postgresql://%s:%s@%s:%d/%s\"\n\n", username, password, "localhost", port, database)
 		}
-	}
-
-	if stop {
+	} else if stop {
 		if err := embeddedPostgres.Stop(); err != nil {
 			log.Fatal(err)
 		}
