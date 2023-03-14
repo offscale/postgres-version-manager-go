@@ -270,11 +270,11 @@ func main() {
 					if v == "latest" {
 						var version embeddedpostgres.PostgresVersion = POSTGRES_VERSIONS[0]
 						fmt.Printf("latest::installing: %s\n", version)
-						return config_then(version, false)
+						return config_then(version, false, false)
 					} else if isValidVersion(v) {
 						var version embeddedpostgres.PostgresVersion = embeddedpostgres.PostgresVersion(v)
 						fmt.Printf("        installing: %s\n", version)
-						return config_then(version, false)
+						return config_then(version, false, false)
 					}
 					return fmt.Errorf("invalid version: %s\n", v)
 				},
@@ -288,11 +288,29 @@ func main() {
 					if v == "latest" {
 						var version embeddedpostgres.PostgresVersion = POSTGRES_VERSIONS[0]
 						fmt.Printf("latest::starting: %s\n", version)
-						return config_then(version, true)
+						return config_then(version, true, false)
 					} else if isValidVersion(v) {
 						var version embeddedpostgres.PostgresVersion = embeddedpostgres.PostgresVersion(v)
 						fmt.Printf("        starting: %s\n", version)
-						return config_then(version, true)
+						return config_then(version, true, false)
+					}
+					return fmt.Errorf("invalid version: %s\n", v)
+				},
+			},
+			&cli.StringFlag{
+				Name:        "stop",
+				Usage:       "Specific postgres version",
+				Value:       "latest",
+				DefaultText: "latest",
+				Action: func(ctx *cli.Context, v string) error {
+					if v == "latest" {
+						var version embeddedpostgres.PostgresVersion = POSTGRES_VERSIONS[0]
+						fmt.Printf("latest::stopping: %s\n", version)
+						return config_then(version, false, true)
+					} else if isValidVersion(v) {
+						var version embeddedpostgres.PostgresVersion = embeddedpostgres.PostgresVersion(v)
+						fmt.Printf("        stopping: %s\n", version)
+						return config_then(version, false, true)
 					}
 					return fmt.Errorf("invalid version: %s\n", v)
 				},
@@ -310,17 +328,16 @@ func main() {
 				},
 			},
 		},
-		HideHelp: false, // I have no idea why `--help` is always printing
+		Description: "PostgreSQL version manager",
+		HideHelp:    false, // I have no idea why `--help` is always printing
 	}
 
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
-
-	//install()
 }
 
-func config_then(version embeddedpostgres.PostgresVersion, start bool) error {
+func config_then(version embeddedpostgres.PostgresVersion, start bool, stop bool) error {
 	const port uint32 = 5433
 	const database string = "postgres"
 	const username string = "postgres"
@@ -329,15 +346,14 @@ func config_then(version embeddedpostgres.PostgresVersion, start bool) error {
 	if err != nil {
 		panic(err)
 	}
-	var versionBasePath string = path.Join(userConfigDir, "postgres-version-manager-go", string(version))
-	var dataPath string = path.Join(versionBasePath, "data")
-	var runtimePath string = dataPath
-	var binariesPath string = path.Join(versionBasePath, "bin")
+	var binariesPath string = path.Join(userConfigDir, "postgres-version-manager-go", string(version))
+	var dataPath string = path.Join(binariesPath, "data")
+	var runtimePath string = path.Join(binariesPath, "run")
 	if _, err := os.Stat(dataPath); errors.Is(err, os.ErrNotExist) {
-		err := os.MkdirAll(dataPath, os.ModePerm)
-		if err != nil {
+		if err = os.MkdirAll(dataPath, os.ModePerm); err != nil {
 			return err
 		}
+		fmt.Printf("No issue making dataPath = \"%s\"\n", dataPath)
 	}
 	const locale string = "en_US.UTF-8"
 	const binaryRepositoryURL string = "https://repo1.maven.org/maven2"
@@ -350,14 +366,14 @@ func config_then(version embeddedpostgres.PostgresVersion, start bool) error {
 		if err := embeddedPostgres.Start(); err != nil {
 			log.Fatal(err)
 		} else {
-			fmt.Printf("RDBMS_URI=\"postgresql://%s:%s@%s:%d/%s\n\"", username, password, "localhost", port, database)
+			fmt.Printf("RDBMS_URI=\"postgresql://%s:%s@%s:%d/%s\"\n\n", username, password, "localhost", port, database)
 		}
 	}
 
-	//if stop {
-	//	if err := embeddedPostgres.Stop(); err != nil {
-	//		log.Fatal(err)
-	//	}
-	//}
+	if stop {
+		if err := embeddedPostgres.Stop(); err != nil {
+			log.Fatal(err)
+		}
+	}
 	return nil
 }

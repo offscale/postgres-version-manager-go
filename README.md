@@ -9,22 +9,25 @@ Like [`rvm`](https://rvm.io)/[`nvm`](https://github.com/nvm-sh/nvm) but for Post
 Tested on Go 1.20, `git clone` this repo then `go build .`
 
 ## Usage
-```
-NAME:
-   postgres-version-manager-go - A new cli application
 
-USAGE:
-   postgres-version-manager-go [global options] command [command options] [arguments...]
-
-COMMANDS:
-   help, h  Shows a list of commands or help for one command
-
-GLOBAL OPTIONS:
-   --install value  Specific postgres version (default: latest)
-   --start value    Specific postgres version (default: latest)
-   --ls-remote      list available versions (default: false)
-   --help, -h       show help
-```
+    NAME:
+    postgres-version-manager-go - A new cli application
+    
+    USAGE:
+    postgres-version-manager-go [global options] command [command options] [arguments...]
+    
+    DESCRIPTION:
+    PostgreSQL version manager
+    
+    COMMANDS:
+    help, h  Shows a list of commands or help for one command
+    
+    GLOBAL OPTIONS:
+    --install value  Specific postgres version (default: latest)
+    --start value    Specific postgres version (default: latest)
+    --stop value     Specific postgres version (default: latest)
+    --ls-remote      list available versions (default: false)
+    --help, -h       show help
 
 ## License
 
