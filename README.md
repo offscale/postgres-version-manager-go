@@ -3,7 +3,7 @@ postgres-version-manager-go
 [![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech)
 [![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT%20OR%20CC0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-Like [`rvm`](https://rvm.io)/[`nvm`](https://github.com/nvm-sh/nvm) but for PostgreSQL. Installs any of 138 different versions of PostgreSQL for your system.
+Like [`rvm`](https://rvm.io)/[`nvm`](https://github.com/nvm-sh/nvm) but for PostgreSQL. Installs any of 135+ different versions of PostgreSQL for your system.
 
 ## Development
 Tested on Go 1.20, `git clone` this repo then `go build .`
