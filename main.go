@@ -1,5 +1,11 @@
 package main
 
+/*
+TODO: fix root config reflection into subcommands
+TODO: add `start` and `stop` subcommands
+TODO: add positional arg to override version in `install`, `start`, and `stop`
+*/
+
 import (
 	"encoding/xml"
 	"errors"
@@ -342,6 +348,10 @@ type ConfigCmd struct {
 	BinaryRepositoryURL string `cli:"binary-repository-url" dft:"https://repo1.maven.org/maven2"`
 }
 
+type LsCmd struct {
+	NoRemote bool `cli:"no-remote" dft:"true"`
+}
+
 type InstallStruct struct {
 	cli.Helper
 }
@@ -360,9 +370,15 @@ var installCommand = &cli.Command{
 var lsCommand = &cli.Command{
 	Name: "ls-remote",
 	Desc: "list available versionsFromMaven",
-	Argv: func() interface{} { return new(InstallStruct) },
+	Argv: func() interface{} { return new(LsCmd) },
 	Fn: func(ctx *cli.Context) error {
-		_ = ctx.Argv().(*LsCli)
+		argv := ctx.Argv().(*LsCmd)
+		if argv.NoRemote {
+			for _, version := range PostgresVersions {
+				fmt.Println(version)
+			}
+			return nil
+		}
 		if versionsFromMaven == nil {
 			versionsFromMaven = getVersionsFromMaven()
 		}
@@ -380,6 +396,7 @@ type rootCli struct {
 
 type LsCli struct {
 	cli.Helper
+	LsCmd
 }
 
 var config = embeddedpostgres.DefaultConfig()
@@ -392,12 +409,19 @@ var root = &cli.Command{
 		var binariesPath string
 		var dataPath string
 		var runtimePath string
+		var postgresVersion string
+		if argv.Version == "latest" {
+			if versionsFromMaven == nil {
+				versionsFromMaven = getVersionsFromMaven()
+			}
+			postgresVersion = versionsFromMaven[len(versionsFromMaven)-1]
+		}
 		if argv.BinariesPath == "" {
 			userConfigDir, err := os.UserConfigDir()
 			if err != nil {
 				return err
 			}
-			binariesPath = path.Join(userConfigDir, "postgres-version-manager-go", string(version))
+			binariesPath = path.Join(userConfigDir, "postgres-version-manager-go", postgresVersion)
 		} else {
 			binariesPath = argv.BinariesPath
 		}
@@ -417,13 +441,7 @@ var root = &cli.Command{
 			}
 			fmt.Printf("No issue making dataPath = \"%s\"\n", dataPath)
 		}
-		var postgresVersion string
-		if argv.Version == "latest" {
-			if versionsFromMaven == nil {
-				versionsFromMaven = getVersionsFromMaven()
-			}
-			postgresVersion = versionsFromMaven[len(versionsFromMaven)-1]
-		}
+		fmt.Printf("runtimePath: \"%s\"\n", runtimePath)
 
 		config = config.Database(argv.Database).Username(argv.Username).Password(argv.Password).Port(argv.Port).BinariesPath(binariesPath).DataPath(dataPath).RuntimePath(runtimePath).Version(embeddedpostgres.PostgresVersion(postgresVersion))
 		return nil
