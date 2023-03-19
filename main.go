@@ -348,12 +348,11 @@ type ConfigCmd struct {
 	BinaryRepositoryURL string `cli:"binary-repository-url" dft:"https://repo1.maven.org/maven2"`
 }
 
-type LsCmd struct {
-	NoRemote bool `cli:"no-remote" dft:"true"`
+type rootCli struct {
+	ConfigCmd
 }
 
 type InstallStruct struct {
-	cli.Helper
 }
 
 var installCommand = &cli.Command{
@@ -362,17 +361,21 @@ var installCommand = &cli.Command{
 	Argv: func() interface{} { return new(InstallStruct) },
 	Fn: func(ctx *cli.Context) error {
 		argv := ctx.Argv().(*InstallStruct)
-		ctx.String("[install] argv.database = %s\n", argv)
+		ctx.String("[install] config = %v, argv = %v\n", config, argv)
 		return postgresConfigThen(config, false, false)
 	},
+}
+
+type LsCmd struct {
+	NoRemote bool `cli:"no-remote" dft:"false"`
 }
 
 var lsCommand = &cli.Command{
 	Name: "ls-remote",
 	Desc: "list available versionsFromMaven",
-	Argv: func() interface{} { return new(LsCmd) },
+	Argv: func() interface{} { return new(lsCli) },
 	Fn: func(ctx *cli.Context) error {
-		argv := ctx.Argv().(*LsCmd)
+		argv := ctx.Argv().(*lsCli)
 		if argv.NoRemote {
 			for _, version := range PostgresVersions {
 				fmt.Println(version)
@@ -389,21 +392,29 @@ var lsCommand = &cli.Command{
 	},
 }
 
-type rootCli struct {
-	cli.Helper
-	ConfigCmd
+/*
+var startCommand = &cli.Command{
+	Name: "start",
+	Desc: "start PostgreSQL server",
+	//	Argv: func() interface{} { return new(LsCmd) },
+	Fn: func(ctx *cli.Context) error {
+		fmt.Println("starting")
+		return nil
+	},
 }
+*/
 
-type LsCli struct {
-	cli.Helper
+type lsCli struct {
 	LsCmd
 }
 
 var config = embeddedpostgres.DefaultConfig()
 
 var root = &cli.Command{
-	Argv: func() interface{} { return new(rootCli) },
+	Argv:   func() interface{} { return new(rootCli) },
+	Global: true,
 	Fn: func(ctx *cli.Context) error {
+		fmt.Println("Reached root Fn:func")
 		argv := ctx.Argv().(*rootCli)
 
 		var binariesPath string
@@ -415,6 +426,10 @@ var root = &cli.Command{
 				versionsFromMaven = getVersionsFromMaven()
 			}
 			postgresVersion = versionsFromMaven[len(versionsFromMaven)-1]
+		} else if isValidVersion(argv.Version) {
+			postgresVersion = argv.Version
+		} else {
+			return fmt.Errorf("invalid/unsupported PostgreSQL version: %s", argv.Version)
 		}
 		if argv.BinariesPath == "" {
 			userConfigDir, err := os.UserConfigDir()
@@ -462,6 +477,7 @@ func main() {
 }
 
 func getVersionsFromMaven() []string {
+	fmt.Println("getVersionsFromMaven")
 	var metadata Metadata
 	{
 		resp, err := http.Get("https://repo1.maven.org/maven2/io/zonky/test/postgres/embedded-postgres-binaries-bom/maven-metadata.xml")
