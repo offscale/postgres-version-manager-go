@@ -12,7 +12,7 @@ import (
 	"time"
 
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
-	cli "github.com/urfave/cli/v2"
+	"github.com/mkideal/cli"
 )
 
 const NumberOfPostgresVersions uintptr = 135
@@ -298,6 +298,8 @@ func isValidVersion(v string) bool {
 	return false
 }
 
+var versionsFromMaven []string = nil
+
 /*
 <metadata>
   <groupId>io.zonky.test.postgres</groupId>
@@ -326,104 +328,118 @@ type Metadata struct {
 	} `xml:"versioning"`
 }
 
+// ConfigCmd taken from github.com/fergusstrange/embedded-postgres@v1.20.0/config.go
+type ConfigCmd struct {
+	Version             string `cli:"version" dft:"latest"`
+	Port                uint32 `cli:"port" dft:"5432"`
+	Database            string `cli:"database" dft:"database"`
+	Username            string `cli:"username" dft:"username"`
+	Password            string `cli:"password" dft:"password"`
+	RuntimePath         string `cli:"runtime-path"`
+	DataPath            string `cli:"data-path"`
+	BinariesPath        string `cli:"binaries-path"`
+	Locale              string `cli:"locale" dft:"en_US.UTF-8"`
+	BinaryRepositoryURL string `cli:"binary-repository-url" dft:"https://repo1.maven.org/maven2"`
+}
+
+type InstallStruct struct {
+	cli.Helper
+}
+
+var installCommand = &cli.Command{
+	Name: "install",
+	Desc: "install specified version of PostgreSQL",
+	Argv: func() interface{} { return new(InstallStruct) },
+	Fn: func(ctx *cli.Context) error {
+		argv := ctx.Argv().(*InstallStruct)
+		ctx.String("[install] argv.database = %s\n", argv)
+		return postgresConfigThen(config, false, false)
+	},
+}
+
+var lsCommand = &cli.Command{
+	Name: "ls-remote",
+	Desc: "list available versionsFromMaven",
+	Argv: func() interface{} { return new(InstallStruct) },
+	Fn: func(ctx *cli.Context) error {
+		_ = ctx.Argv().(*LsCli)
+		if versionsFromMaven == nil {
+			versionsFromMaven = getVersionsFromMaven()
+		}
+		for _, version := range versionsFromMaven {
+			fmt.Println(version)
+		}
+		return nil
+	},
+}
+
+type rootCli struct {
+	cli.Helper
+	ConfigCmd
+}
+
+type LsCli struct {
+	cli.Helper
+}
+
+var config = embeddedpostgres.DefaultConfig()
+
+var root = &cli.Command{
+	Argv: func() interface{} { return new(rootCli) },
+	Fn: func(ctx *cli.Context) error {
+		argv := ctx.Argv().(*rootCli)
+
+		var binariesPath string
+		var dataPath string
+		var runtimePath string
+		if argv.BinariesPath == "" {
+			userConfigDir, err := os.UserConfigDir()
+			if err != nil {
+				return err
+			}
+			binariesPath = path.Join(userConfigDir, "postgres-version-manager-go", string(version))
+		} else {
+			binariesPath = argv.BinariesPath
+		}
+		if argv.DataPath == "" {
+			dataPath = path.Join(binariesPath, "data")
+		} else {
+			dataPath = argv.DataPath
+		}
+		if argv.DataPath == "" {
+			runtimePath = path.Join(binariesPath, "run")
+		} else {
+			runtimePath = argv.RuntimePath
+		}
+		if _, err := os.Stat(dataPath); errors.Is(err, os.ErrNotExist) {
+			if err = os.MkdirAll(dataPath, os.ModePerm); err != nil {
+				return err
+			}
+			fmt.Printf("No issue making dataPath = \"%s\"\n", dataPath)
+		}
+		var postgresVersion string
+		if argv.Version == "latest" {
+			if versionsFromMaven == nil {
+				versionsFromMaven = getVersionsFromMaven()
+			}
+			postgresVersion = versionsFromMaven[len(versionsFromMaven)-1]
+		}
+
+		config = config.Database(argv.Database).Username(argv.Username).Password(argv.Password).Port(argv.Port).BinariesPath(binariesPath).DataPath(dataPath).RuntimePath(runtimePath).Version(embeddedpostgres.PostgresVersion(postgresVersion))
+		return nil
+	},
+}
+
 func main() {
-	var versionsFromMaven []string = nil
-
-	app := &cli.App{
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:        "install",
-				Usage:       "Specific postgres version",
-				Value:       "latest",
-				DefaultText: "latest",
-				Action: func(ctx *cli.Context, v string) error {
-					var postgresVersion embeddedpostgres.PostgresVersion
-					if v == "latest" {
-						if versionsFromMaven == nil {
-							versionsFromMaven = getVersionsFromMaven()
-						}
-						postgresVersion = embeddedpostgres.PostgresVersion(versionsFromMaven[len(versionsFromMaven)-1])
-						goto validVersion
-					} else if isValidVersion(v) {
-						postgresVersion = embeddedpostgres.PostgresVersion(v)
-						goto validVersion
-					}
-
-					return fmt.Errorf("invalid version: %s\n", v)
-				validVersion:
-					return postgresConfigThen(postgresVersion, false, false)
-				},
-			},
-			&cli.StringFlag{
-				Name:        "start",
-				Usage:       "Specific postgres version",
-				Value:       "latest",
-				DefaultText: "latest",
-				Action: func(ctx *cli.Context, v string) error {
-					var postgresVersion embeddedpostgres.PostgresVersion
-					if v == "latest" {
-						if versionsFromMaven == nil {
-							versionsFromMaven = getVersionsFromMaven()
-						}
-						postgresVersion = embeddedpostgres.PostgresVersion(versionsFromMaven[len(versionsFromMaven)-1])
-						goto validVersion
-					} else if isValidVersion(v) {
-						postgresVersion = embeddedpostgres.PostgresVersion(v)
-						goto validVersion
-					}
-					return fmt.Errorf("invalid version: %s\n", v)
-				validVersion:
-					return postgresConfigThen(postgresVersion, true, false)
-				},
-			},
-			&cli.StringFlag{
-				Name:        "stop",
-				Usage:       "Specific postgres version",
-				Value:       "latest",
-				DefaultText: "latest",
-				Action: func(ctx *cli.Context, v string) error {
-					var postgresVersion embeddedpostgres.PostgresVersion
-					if v == "latest" {
-						if versionsFromMaven == nil {
-							versionsFromMaven = getVersionsFromMaven()
-						}
-						postgresVersion = embeddedpostgres.PostgresVersion(versionsFromMaven[len(versionsFromMaven)-1])
-						goto validVersion
-					} else if isValidVersion(v) {
-						postgresVersion = embeddedpostgres.PostgresVersion(v)
-						goto validVersion
-					}
-					return fmt.Errorf("invalid version: %s\n", v)
-				validVersion:
-					return postgresConfigThen(postgresVersion, false, true)
-				},
-			},
-			&cli.BoolFlag{
-				Name:  "ls-remote",
-				Usage: "list available versionsFromMaven",
-				Action: func(ctx *cli.Context, v bool) error {
-					if v {
-						for _, version := range PostgresVersions {
-							fmt.Println(version)
-						}
-					}
-					return nil
-				},
-			},
-			&cli.UintFlag{
-				Name:  "port",
-				Usage: "specify port to start/stop PostgreSQL on",
-				Value: 5432,
-				// EnvVars: string[]{"PORT"},
-				Action: nil,
-			},
-		},
-		Description: "PostgreSQL version manager",
-		HideHelp:    false, // I have no idea why `--help` is always printing
-	}
-
-	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+	if err := cli.Root(root,
+		cli.Tree(installCommand),
+		cli.Tree(lsCommand),
+	).Run(os.Args[1:]); err != nil {
+		_, err := fmt.Fprintln(os.Stderr, err)
+		if err != nil {
+			panic(err)
+		}
+		os.Exit(1)
 	}
 }
 
@@ -448,36 +464,17 @@ func getVersionsFromMaven() []string {
 	return metadata.Versioning.Versions.Version
 }
 
-func postgresConfigThen(version embeddedpostgres.PostgresVersion, start bool, stop bool) error {
-	const database string = "postgres"
-	const username string = "postgres"
-	const password string = "postgres"
-	const port uint32 = 5432
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		return err
-	}
-	var binariesPath string = path.Join(userConfigDir, "postgres-version-manager-go", string(version))
-	var dataPath string = path.Join(binariesPath, "data")
-	var runtimePath string = path.Join(binariesPath, "run")
-	if _, err := os.Stat(dataPath); errors.Is(err, os.ErrNotExist) {
-		if err = os.MkdirAll(dataPath, os.ModePerm); err != nil {
-			return err
-		}
-		fmt.Printf("No issue making dataPath = \"%s\"\n", dataPath)
-	}
-	const locale string = "en_US.UTF-8"
-	const binaryRepositoryURL string = "https://repo1.maven.org/maven2"
+func postgresConfigThen(config embeddedpostgres.Config, start bool, stop bool) error {
 	const startTimeout time.Duration = 15 * time.Second // nanosecond
 	var logger io.Writer = os.Stdout
 	var embeddedPostgres *embeddedpostgres.EmbeddedPostgres = embeddedpostgres.NewDatabase(
-		embeddedpostgres.DefaultConfig().Version(version).Port(port).Database(database).Username(username).Password(password).RuntimePath(runtimePath).DataPath(dataPath).BinariesPath(binariesPath).Locale(locale).BinaryRepositoryURL(binaryRepositoryURL).StartTimeout(startTimeout).Logger(logger),
+		config.StartTimeout(startTimeout).Logger(logger),
 	)
 	if start {
 		if err := embeddedPostgres.Start(); err != nil {
 			log.Fatal(err)
 		} else {
-			fmt.Printf("RDBMS_URI=\"postgresql://%s:%s@%s:%d/%s\"\n\n", username, password, "localhost", port, database)
+			fmt.Printf("RDBMS_URI=\"postgresql://%s:%s@%s:%d/%s\"\n\n", "TODO", "password", "localhost", "", "")
 		}
 	} else if stop {
 		if err := embeddedPostgres.Stop(); err != nil {
