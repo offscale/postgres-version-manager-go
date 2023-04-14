@@ -60,6 +60,7 @@ func (args) Description() string {
 
 func main() {
 	var args args
+	wasLatest := false
 	args.PostgresVersion = "latest"
 	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
@@ -73,6 +74,7 @@ func main() {
 
 	// Need to know what "latest" is if not doing `--ls-remote` and "latest" is PostgresVersion
 	if args.PostgresVersion == "latest" {
+		wasLatest = true
 		if args.NoRemote {
 			var err error
 			if err, versionsFromMaven = getVersionsFromMaven(args.BinaryRepositoryURL); err != nil {
@@ -104,6 +106,12 @@ func main() {
 			log.Fatal(err)
 		}
 	case args.Install != nil:
+		if args.Install.PostgresVersion != "" && (args.Install.PostgresVersion != "latest" || !wasLatest) {
+			if !isValidVersion(string(args.Install.PostgresVersion)) {
+				log.Fatalf("invalid/unsupported PostgreSQL version: %s", args.Install.PostgresVersion)
+			}
+			config = config.Version(args.Install.PostgresVersion)
+		}
 		embeddedpostgres.NewDatabase(config)
 	case args.LsRemote != nil:
 		if args.NoRemote {
