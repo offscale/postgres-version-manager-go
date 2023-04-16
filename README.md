@@ -17,128 +17,82 @@ Tested on Go 1.20, `git clone` this repo then `go build .`
     
     Options:
     --postgres-version POSTGRES-VERSION [default: latest, env: POSTGRES_VERSION]
-    --port PORT, -p PORT [default: 5432, env: POSTGRES_PORT]
+    --port PORT, -p PORT [default: 5432, env: PGPORT]
     --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
     --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
     --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
     --runtime-path RUNTIME-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: DATA_PATH]
+    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: PGDATA]
     --binary-path BINARY-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest, env: BINARY_PATH]
     --locale LOCALE [default: en_US.UTF-8,env:LANGUAGE]
     --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
-    --no-remote [default: false]
+    --no-remote            Disable HTTPS calls for everything except 'install' [default: false]
     --help, -h             display this help and exit
     
     Commands:
-    env
-    start
-    stop
-    install
-    ls-remote
+    env                    Print out database connection string
+    start                  Start specified PostgreSQL server
+    stop                   Stop specific (running) PostgreSQL server
+    install                Install specified PostgreSQL version
+    ls-remote              List what versions of PostgreSQL are available
 
-### `env`
+#### Global options
 
-    PostgreSQL version manager
-    Usage: postgres-version-manager-go env
-    
-    Global options:
+Common to all subcommands
+
     --postgres-version POSTGRES-VERSION [default: latest, env: POSTGRES_VERSION]
-    --port PORT, -p PORT [default: 5432, env: POSTGRES_PORT]
+    --port PORT, -p PORT [default: 5432, env: PGPORT]
     --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
     --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
     --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
     --runtime-path RUNTIME-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: DATA_PATH]
+    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: PGDATA]
     --binary-path BINARY-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest, env: BINARY_PATH]
     --locale LOCALE [default: en_US.UTF-8,env:LANGUAGE]
     --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
-    --no-remote [default: false]
+    --no-remote            Disable HTTPS calls for everything except 'install' [default: false]
     --help, -h             display this help and exit
+
+### `env`
+
+Print out database connection string
+
+    Usage: postgres-version-manager-go env
 
 ### `start`
 
-    PostgreSQL version manager
+Start specified PostgreSQL server
+
     Usage: postgres-version-manager-go start [--pid PID]
     
     Options:
     --pid PID              If PID provided and exists, will stop that process. [default: -1]
-    
-    Global options:
-    --postgres-version POSTGRES-VERSION [default: latest, env: POSTGRES_VERSION]
-    --port PORT, -p PORT [default: 5432, env: POSTGRES_PORT]
-    --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
-    --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
-    --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
-    --runtime-path RUNTIME-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: DATA_PATH]
-    --binary-path BINARY-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest, env: BINARY_PATH]
-    --locale LOCALE [default: en_US.UTF-8,env:LANGUAGE]
-    --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
-    --no-remote [default: false]
-    --help, -h             display this help and exit
 
 ### `stop`
 
-    PostgreSQL version manager
+Stop specific (running) PostgreSQL server
+
     Usage: postgres-version-manager-go stop [--pid PID]
     
     Options:
     --pid PID [default: -1]
-    
-    Global options:
-    --postgres-version POSTGRES-VERSION [default: latest, env: POSTGRES_VERSION]
-    --port PORT, -p PORT [default: 5432, env: POSTGRES_PORT]
-    --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
-    --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
-    --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
-    --runtime-path RUNTIME-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: DATA_PATH]
-    --binary-path BINARY-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest, env: BINARY_PATH]
-    --locale LOCALE [default: en_US.UTF-8,env:LANGUAGE]
-    --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
-    --no-remote [default: false]
-    --help, -h             display this help and exit
 
 ### `install`
 
-    PostgreSQL version manager
+Install specified PostgreSQL version
+
     Usage: postgres-version-manager-go install [POSTGRESVERSION]
     
     Positional arguments:
     POSTGRESVERSION
-    
-    Global options:
-    --postgres-version POSTGRES-VERSION [default: latest, env: POSTGRES_VERSION]
-    --port PORT, -p PORT [default: 5432, env: POSTGRES_PORT]
-    --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
-    --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
-    --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
-    --runtime-path RUNTIME-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: DATA_PATH]
-    --binary-path BINARY-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest, env: BINARY_PATH]
-    --locale LOCALE [default: en_US.UTF-8,env:LANGUAGE]
-    --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
-    --no-remote [default: false]
-    --help, -h             display this help and exit
 
 ### `ls-remote`
 
-    PostgreSQL version manager
+List what versions of PostgreSQL are available
+
     Usage: postgres-version-manager-go ls-remote
-    
-    Global options:
-    --postgres-version POSTGRES-VERSION [default: latest, env: POSTGRES_VERSION]
-    --port PORT, -p PORT [default: 5432, env: POSTGRES_PORT]
-    --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
-    --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
-    --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
-    --runtime-path RUNTIME-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: DATA_PATH]
-    --binary-path BINARY-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest, env: BINARY_PATH]
-    --locale LOCALE [default: en_US.UTF-8,env:LANGUAGE]
-    --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
-    --no-remote [default: false]
-    --help, -h             display this help and exit
+
+---    
 
 ## License
 
