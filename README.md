@@ -88,6 +88,12 @@ Install specified PostgreSQL version
 
 ### `ls-remote`
 
+List what versions of PostgreSQL are installed
+
+    Usage: postgres-version-manager-go ls
+
+### `ls-remote`
+
 List what versions of PostgreSQL are available
 
     Usage: postgres-version-manager-go ls-remote

@@ -19,6 +19,7 @@ type ConfigStruct struct {
 	Database            string                           `arg:"-d,env:POSTGRES_DATABASE" default:"database"`
 	Username            string                           `arg:"-u,env:POSTGRES_USERNAME" default:"username"`
 	Password            string                           `arg:"env:POSTGRES_PASSWORD" default:"password"`
+	VersionManagerRoot  string                           `arg:"env:VERSION_MANAGER_ROOT"`
 	RuntimePath         string                           `arg:"--runtime-path,env:RUNTIME_PATH"`
 	DataPath            string                           `arg:"--data-path,env:PGDATA"`
 	BinariesPath        string                           `arg:"--binary-path,env:BINARY_PATH"`
@@ -38,14 +39,13 @@ type InstallCmd struct {
 	PostgresVersion embeddedpostgres.PostgresVersion `arg:"positional" default:""`
 }
 
+type LsCmd struct {
+}
+
 type LsRemoteCmd struct {
 }
 
 type EnvCmd struct {
-}
-
-func (InstallCmd) Description() string {
-	return "this program does this and that"
 }
 
 type args struct {
@@ -55,6 +55,7 @@ type args struct {
 	Start    *StartCmd    `arg:"subcommand:start" help:"Start specified PostgreSQL server"`
 	Stop     *StopCmd     `arg:"subcommand:stop" help:"Stop specific (running) PostgreSQL server"`
 	Install  *InstallCmd  `arg:"subcommand:install" help:"Install specified PostgreSQL version"`
+	Ls       *LsCmd       `arg:"subcommand:ls-remote" help:"List what versions of PostgreSQL are installed"`
 	LsRemote *LsRemoteCmd `arg:"subcommand:ls-remote" help:"List what versions of PostgreSQL are available"`
 }
 
@@ -65,19 +66,22 @@ func (args) Description() string {
 func main() {
 	var args args
 	var err error
-	var userConfigDir string
+	var userHomeDir string
 
 	wasLatest := false
 	args.PostgresVersion = "latest"
-	userConfigDir, err = os.UserConfigDir()
+	userHomeDir, err = os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
 	}
-	args.BinariesPath = path.Join(userConfigDir, "postgres-version-manager-go", string(args.PostgresVersion))
+	args.VersionManagerRoot = path.Join(userHomeDir, "postgres-version-manager")
+	args.BinariesPath = path.Join(args.VersionManagerRoot, string(args.PostgresVersion))
 	args.DataPath = path.Join(args.BinariesPath, "data")
 	args.RuntimePath = path.Join(args.BinariesPath, "run")
 
 	arg.MustParse(&args)
+
+	cacheLocation := path.Join(args.VersionManagerRoot, "downloads")
 
 	// Need to know what "latest" is if not doing `--ls-remote` and "latest" is PostgresVersion
 	if args.PostgresVersion == "latest" {
@@ -88,11 +92,12 @@ func main() {
 			}
 			args.PostgresVersion = embeddedpostgres.PostgresVersion(versionsFromMaven[len(versionsFromMaven)-1])
 		} else {
+			fmt.Println("changing")
 			args.PostgresVersion = PostgresVersions[NumberOfPostgresVersions-1]
 		}
-		latestBinariesPath := path.Join(userConfigDir, "postgres-version-manager-go", "latest")
+		latestBinariesPath := path.Join(userHomeDir, "postgres-version-manager-go", "latest")
 		if latestBinariesPath == args.BinariesPath {
-			args.BinariesPath = path.Join(userConfigDir, "postgres-version-manager-go", string(args.PostgresVersion))
+			args.BinariesPath = path.Join(userHomeDir, "postgres-version-manager-go", string(args.PostgresVersion))
 			if path.Join(latestBinariesPath, "data") == args.DataPath {
 				args.DataPath = path.Join(args.BinariesPath, "data")
 			}
@@ -103,17 +108,28 @@ func main() {
 	} else if !isValidVersion(string(args.PostgresVersion)) {
 		log.Fatalf("invalid/unsupported PostgreSQL version: %s\n", args.PostgresVersion)
 	}
+	if args.PostgresVersion == "latest" {
+		panic("latest")
+	}
 
 	var config = embeddedpostgres.DefaultConfig().Database(args.Database).Username(args.Username).Password(args.Password).Port(args.Port).BinariesPath(args.BinariesPath).DataPath(args.DataPath).RuntimePath(args.RuntimePath).Version(args.PostgresVersion).Locale(args.Locale)
+	var postgresVersion embeddedpostgres.PostgresVersion = args.ConfigStruct.PostgresVersion
+	fmt.Printf("postgresVersion: %s\n", postgresVersion)
 
 	switch {
 	case args.Start != nil:
-		embeddedpostgres.NewDatabase(config)
+		if err = ensureDirsExist(args.ConfigStruct.VersionManagerRoot, args.ConfigStruct.DataPath); err != nil {
+			log.Fatal(err)
+		}
+		downloadExtractIfNonexistent(postgresVersion, args.ConfigStruct.BinaryRepositoryURL, cacheLocation)
 		if err = startPostgres(&args.ConfigStruct); err != nil {
 			log.Fatal(err)
 		}
+		if err = createDatabase(args.Port, args.Username, args.Password, args.Database); err != nil {
+			log.Fatal(err)
+		}
 	case args.Stop != nil:
-		if err = embeddedpostgres.NewDatabase(config).Stop(); err != nil {
+		if err = stopPostgres(&args.ConfigStruct); err != nil {
 			log.Fatal(err)
 		}
 	case args.Install != nil:
@@ -122,8 +138,10 @@ func main() {
 				log.Fatalf("invalid/unsupported PostgreSQL version: %s\n", args.Install.PostgresVersion)
 			}
 			config = config.Version(args.Install.PostgresVersion)
+			postgresVersion = args.Install.PostgresVersion
 		}
-		embeddedpostgres.NewDatabase(config)
+		downloadExtractIfNonexistent(postgresVersion, args.ConfigStruct.BinaryRepositoryURL, cacheLocation)
+		// embeddedpostgres.NewDatabase(config)
 	case args.LsRemote != nil:
 		if args.NoRemote {
 			for _, version := range PostgresVersions {

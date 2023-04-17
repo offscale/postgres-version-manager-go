@@ -2,12 +2,15 @@ package main
 
 import (
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 )
@@ -365,7 +368,72 @@ func startPostgres(config *ConfigStruct) error {
 		return fmt.Errorf("could not start postgres using %s:\n%s", postgresProcess.String(), string(logContent))
 	}
 
-	fmt.Printf("%d\n", postgresProcess.Process.Pid)
+	return nil
+}
 
+func stopPostgres(config *ConfigStruct) error {
+	postgresBinary := filepath.Join(config.BinariesPath, "bin", "pg_ctl")
+	postgresProcess := exec.Command(postgresBinary, "stop", "-w",
+		"-D", config.DataPath,
+		"-o", fmt.Sprintf(`"-p %d"`, config.Port))
+
+	syncedLog, err := newSyncedLogger(config.DataPath, os.Stdout)
+	if err != nil {
+		return err
+	}
+
+	postgresProcess.Stdout = syncedLog.file
+	postgresProcess.Stderr = syncedLog.file
+
+	if err := postgresProcess.Run(); err != nil {
+		_ = syncedLog.flush()
+		logContent, _ := readLogsOrTimeout(syncedLog.file)
+
+		return fmt.Errorf("could not stop postgres using %s:\n%s", postgresProcess.String(), string(logContent))
+	}
+
+	return nil
+}
+
+func defaultCacheLocator(cacheDirectory string, versionStrategy embeddedpostgres.VersionStrategy) embeddedpostgres.CacheLocator {
+	return func() (string, bool) {
+		operatingSystem, architecture, version := versionStrategy()
+		cacheLocation := filepath.Join(cacheDirectory,
+			fmt.Sprintf("embedded-postgres-binaries-%s-%s-%s.txz",
+				operatingSystem,
+				architecture,
+				version))
+
+		info, err := os.Stat(cacheLocation)
+
+		if err != nil {
+			return cacheLocation, os.IsExist(err) && !info.IsDir()
+		}
+
+		return cacheLocation, !info.IsDir()
+	}
+}
+
+func downloadExtractIfNonexistent(postgresVersion embeddedpostgres.PostgresVersion, binaryRepositoryURL, cacheLocation string) {
+	versionStrategy := defaultVersionStrategy(
+		postgresVersion,
+		runtime.GOOS,
+		runtime.GOARCH,
+		linuxMachineName,
+		shouldUseAlpineLinuxBuild,
+	)
+	cacheLocator := defaultCacheLocator(cacheLocation, versionStrategy)
+	remoteFetchStrategy := defaultRemoteFetchStrategy(binaryRepositoryURL, versionStrategy, cacheLocator)
+	fmt.Printf("remoteFetchStrategy(): \"%s\"\n", remoteFetchStrategy())
+}
+
+func ensureDirsExist(dirs ...string) error {
+	for _, d := range dirs {
+		if _, err := os.Stat(d); errors.Is(err, os.ErrNotExist) {
+			if err = os.MkdirAll(d, fs.ModeDir); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
