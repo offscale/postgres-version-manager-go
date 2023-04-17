@@ -1,5 +1,5 @@
 // Originally from embeddedpostgres so should be under its license
-package main
+package pvm
 
 import (
 	"fmt"

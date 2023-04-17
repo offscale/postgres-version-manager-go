@@ -1,4 +1,4 @@
-package main
+package pvm
 
 import (
 	"archive/zip"
