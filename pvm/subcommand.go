@@ -6,14 +6,12 @@ import (
 	"log"
 	"os"
 	"unicode"
-
-	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 )
 
-func installSubcommand(args args, wasLatest bool, cacheLocation string) error {
+func InstallSubcommand(args Args, wasLatest bool, cacheLocation string) error {
 	var err error
-	var postgresVersion embeddedpostgres.PostgresVersion = args.PostgresVersion
-	if err = ensureDirsExist(args.ConfigStruct.VersionManagerRoot, args.ConfigStruct.DataPath); err != nil {
+	postgresVersion := args.PostgresVersion
+	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath); err != nil {
 		return err
 	}
 	if args.Install.PostgresVersion != "" && (args.Install.PostgresVersion != "latest" || !wasLatest) {
@@ -22,15 +20,15 @@ func installSubcommand(args args, wasLatest bool, cacheLocation string) error {
 		}
 		postgresVersion = args.Install.PostgresVersion
 	}
-	return downloadExtractIfNonexistent(postgresVersion, args.ConfigStruct.BinaryRepositoryURL, cacheLocation)()
+	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot)()
 }
 
-func startSubcommand(args args, cacheLocation string) error {
+func StartSubcommand(args Args, cacheLocation string) error {
 	var err error
-	if err = ensureDirsExist(args.ConfigStruct.VersionManagerRoot, args.ConfigStruct.DataPath); err != nil {
+	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath); err != nil {
 		return err
 	}
-	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.ConfigStruct.BinaryRepositoryURL, cacheLocation)(); err != nil {
+	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot)(); err != nil {
 		return err
 	}
 	if err = startPostgres(&args.ConfigStruct); err != nil {
@@ -39,7 +37,7 @@ func startSubcommand(args args, cacheLocation string) error {
 	return createDatabase(args.Port, args.Username, args.Password, args.Database)
 }
 
-func LsSubcommand(err error, args args) error {
+func LsSubcommand(err error, args Args) error {
 	var dirs []os.DirEntry
 	dirs, err = os.ReadDir(args.VersionManagerRoot)
 	if err != nil {
@@ -53,7 +51,7 @@ func LsSubcommand(err error, args args) error {
 	return err
 }
 
-func LsRemoteSubcommand(args args) error {
+func LsRemoteSubcommand(args Args) error {
 	var err error
 	if args.NoRemote {
 		for _, version := range PostgresVersions {

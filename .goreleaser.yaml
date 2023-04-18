@@ -10,6 +10,8 @@ builds:
       - linux
       - windows
       - darwin
+    main: ./cmd
+    binary: pvm-go
 
 archives:
   - format: tar.gz

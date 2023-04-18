@@ -1,6 +1,7 @@
 package pvm
 
 import (
+	"archive/tar"
 	"archive/zip"
 	"bytes"
 	"crypto/sha256"
@@ -11,14 +12,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
 	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
+	"github.com/xi2/xz"
 )
 
 //nolint:funlen
-func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy embeddedpostgres.VersionStrategy, cacheLocator embeddedpostgres.CacheLocator) embeddedpostgres.RemoteFetchStrategy {
+func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy embeddedpostgres.VersionStrategy, cacheLocator embeddedpostgres.CacheLocator, versionManagerRoot string) embeddedpostgres.RemoteFetchStrategy {
 	return func() error {
 		operatingSystem, architecture, version := versionStrategy()
 
@@ -61,7 +64,93 @@ func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy embedded
 			}
 		}
 
-		return decompressResponse(jarBodyBytes, jarDownloadResponse.ContentLength, cacheLocator, jarDownloadURL)
+		// Extract out the archive to the cache dir:
+		// e.g., 'embedded-postgres-binaries-linux-amd64-15.1.0.txz' to "$HOME"'/postgres-version-manager/downloads/'
+		var tarFilePath string
+		if tarFilePath, err = decompressResponse(jarBodyBytes, jarDownloadResponse.ContentLength, cacheLocator, jarDownloadURL); err != nil {
+			return err
+		}
+
+		destinationFolderPath := path.Join(versionManagerRoot, string(version))
+		if _, err = os.Stat(path.Join(destinationFolderPath, "bin")); err == nil {
+			return nil
+		}
+		return extractArchiveToDir(tarFilePath, destinationFolderPath)
+	}
+}
+
+func extractArchiveToDir(archiveFilePath string, destinationFolderPath string) error {
+	var err error
+	var f *os.File
+
+	if f, err = os.Open(archiveFilePath); err != nil {
+		return err
+	}
+
+	var r *xz.Reader
+	if r, err = xz.NewReader(f, 0); err != nil {
+		return err
+	}
+	tr := tar.NewReader(r)
+	alreadyClosed := false
+	defer func(f *os.File) {
+		if !alreadyClosed {
+			err := f.Close()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+	}(f)
+	for {
+		var hdr *tar.Header
+		if hdr, err = tr.Next(); err != nil {
+			if err == io.EOF {
+				alreadyClosed = true
+				return f.Close()
+			}
+			return err
+		}
+		name := path.Join(destinationFolderPath, hdr.Name)
+		switch hdr.Typeflag {
+		case tar.TypeDir:
+			if err = os.MkdirAll(name, hdr.FileInfo().Mode()); err != nil {
+				return err
+			}
+		case tar.TypeReg:
+			var w *os.File
+			parentDirectory := path.Dir(name)
+			if err = os.MkdirAll(parentDirectory, hdr.FileInfo().Mode()); err != nil {
+				return err
+			}
+			if err = ensureDirsExist(path.Dir(name)); err != nil {
+				return err
+			}
+			if w, err = os.Create(name); err != nil {
+				return err
+			}
+			if _, err = io.Copy(w, tr); err != nil {
+				return err
+			}
+			if err = w.Close(); err != nil {
+				return err
+			}
+			if err = os.Chmod(name, hdr.FileInfo().Mode()); err != nil {
+				return err
+			}
+		case tar.TypeRegA:
+			fmt.Println("TypeRegA: " + name)
+		case tar.TypeLink:
+			fmt.Println("TypeLink: " + name)
+		case tar.TypeSymlink:
+			if err := os.Symlink(hdr.Linkname, name); err != nil && !os.IsExist(err) {
+				return err
+			}
+			if err = os.Chmod(name, hdr.FileInfo().Mode()); err != nil {
+				return err
+			}
+		default:
+			fmt.Println("doing nothing with: " + name + " of " + string(hdr.Typeflag))
+		}
 	}
 }
 
@@ -73,39 +162,39 @@ func closeBody(resp *http.Response) func() {
 	}
 }
 
-func decompressResponse(bodyBytes []byte, contentLength int64, cacheLocator embeddedpostgres.CacheLocator, downloadURL string) error {
+func decompressResponse(bodyBytes []byte, contentLength int64, cacheLocator embeddedpostgres.CacheLocator, downloadURL string) (string, error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(bodyBytes), contentLength)
 	if err != nil {
-		return errorFetchingPostgres(err)
+		return "", errorFetchingPostgres(err)
 	}
 
 	for _, file := range zipReader.File {
 		if !file.FileHeader.FileInfo().IsDir() && strings.HasSuffix(file.FileHeader.Name, ".txz") {
 			archiveReader, err := file.Open()
 			if err != nil {
-				return errorExtractingPostgres(err)
+				return "", errorExtractingPostgres(err)
 			}
 
 			archiveBytes, err := io.ReadAll(archiveReader)
 			if err != nil {
-				return errorExtractingPostgres(err)
+				return "", errorExtractingPostgres(err)
 			}
 
 			cacheLocation, _ := cacheLocator()
 
 			if err := os.MkdirAll(filepath.Dir(cacheLocation), 0755); err != nil {
-				return errorExtractingPostgres(err)
+				return "", errorExtractingPostgres(err)
 			}
 
 			if err := os.WriteFile(cacheLocation, archiveBytes, file.FileHeader.Mode()); err != nil {
-				return errorExtractingPostgres(err)
+				return "", errorExtractingPostgres(err)
 			}
 
-			return nil
+			return cacheLocation, nil
 		}
 	}
 
-	return fmt.Errorf("error fetching postgres: cannot find binary in archive retrieved from %s", downloadURL)
+	return "", fmt.Errorf("error fetching postgres: cannot find binary in archive retrieved from %s", downloadURL)
 }
 
 func errorExtractingPostgres(err error) error {

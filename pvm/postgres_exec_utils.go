@@ -32,7 +32,7 @@ func startPostgres(config *ConfigStruct) error {
 	return nil
 }
 
-func stopPostgres(config *ConfigStruct) error {
+func StopPostgres(config *ConfigStruct) error {
 	postgresBinary := filepath.Join(config.BinariesPath, "bin", "pg_ctl")
 	postgresProcess := exec.Command(postgresBinary, "stop", "-w",
 		"-D", config.DataPath,
