@@ -13,27 +13,14 @@ Tested on Go 1.20, `git clone` this repo then `go build .`
 ## Usage
 
     PostgreSQL version manager
-    Usage: postgres-version-manager-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--no-remote] <command> [<args>]
-    
-    Options:
-    --postgres-version POSTGRES-VERSION [default: latest, env: POSTGRES_VERSION]
-    --port PORT, -p PORT [default: 5432, env: PGPORT]
-    --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
-    --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
-    --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
-    --runtime-path RUNTIME-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: PGDATA]
-    --binary-path BINARY-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest, env: BINARY_PATH]
-    --locale LOCALE [default: en_US.UTF-8,env:LANGUAGE]
-    --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
-    --no-remote            Disable HTTPS calls for everything except 'install' [default: false]
-    --help, -h             display this help and exit
+    Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--versionmanagerroot VERSIONMANAGERROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--no-remote] <command> [<args>]
     
     Commands:
     env                    Print out database connection string
     start                  Start specified PostgreSQL server
     stop                   Stop specific (running) PostgreSQL server
     install                Install specified PostgreSQL version
+    ls                     List what versions of PostgreSQL are installed
     ls-remote              List what versions of PostgreSQL are available
 
 #### Global options
@@ -45,10 +32,11 @@ Common to all subcommands
     --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
     --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
     --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
-    --runtime-path RUNTIME-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest/data, env: PGDATA]
-    --binary-path BINARY-PATH [default: /home/samuel/.config/postgres-version-manager-go/latest, env: BINARY_PATH]
-    --locale LOCALE [default: en_US.UTF-8,env:LANGUAGE]
+    --versionmanagerroot VERSIONMANAGERROOT [default: /home/samuel/postgres-version-manager, env: VERSION_MANAGER_ROOT]
+    --runtime-path RUNTIME-PATH [default: /home/samuel/postgres-version-manager/latest/run, env: RUNTIME_PATH]
+    --data-path DATA-PATH [default: /home/samuel/postgres-version-manager/latest/data, env: PGDATA]
+    --binary-path BINARY-PATH [default: /home/samuel/postgres-version-manager/latest, env: BINARY_PATH]
+    --locale LOCALE [default: en_US.UTF-8, env: LC_ALL]
     --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
     --no-remote            Disable HTTPS calls for everything except 'install' [default: false]
     --help, -h             display this help and exit
@@ -57,13 +45,13 @@ Common to all subcommands
 
 Print out database connection string
 
-    Usage: postgres-version-manager-go env
+    Usage: pvm-go env
 
 ### `start`
 
 Start specified PostgreSQL server
 
-    Usage: postgres-version-manager-go start [--pid PID]
+    Usage: pvm-go start [--pid PID]
     
     Options:
     --pid PID              If PID provided and exists, will stop that process. [default: -1]
@@ -72,7 +60,7 @@ Start specified PostgreSQL server
 
 Stop specific (running) PostgreSQL server
 
-    Usage: postgres-version-manager-go stop [--pid PID]
+    Usage: pvm-go stop [--pid PID]
     
     Options:
     --pid PID [default: -1]
@@ -81,22 +69,22 @@ Stop specific (running) PostgreSQL server
 
 Install specified PostgreSQL version
 
-    Usage: postgres-version-manager-go install [POSTGRESVERSION]
+    Usage: pvm-go install [POSTGRESVERSION]
     
     Positional arguments:
     POSTGRESVERSION
 
-### `ls-remote`
+### `ls`
 
 List what versions of PostgreSQL are installed
 
-    Usage: postgres-version-manager-go ls
+    Usage: pvm-go ls
 
 ### `ls-remote`
 
 List what versions of PostgreSQL are available
 
-    Usage: postgres-version-manager-go ls-remote
+    Usage: pvm-go ls-remote
 
 ---    
 
