@@ -1,4 +1,5 @@
-// Originally from embeddedpostgres so should be under its license
+// Package pvm logging.go from github.com/fergusstrange/embedded-postgres and modified
+// (so should be considered under same license)
 package pvm
 
 import (

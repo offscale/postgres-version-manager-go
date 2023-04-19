@@ -1,3 +1,6 @@
+// Package pvm remote_fetch.go from github.com/fergusstrange/embedded-postgres and modified
+// (so should be considered under same license; except for `extractArchiveToDir`)
+
 package pvm
 
 import (
@@ -95,8 +98,7 @@ func extractArchiveToDir(archiveFilePath string, destinationFolderPath string) e
 	alreadyClosed := false
 	defer func(f *os.File) {
 		if !alreadyClosed {
-			err := f.Close()
-			if err != nil {
+			if err = f.Close(); err != nil {
 				log.Fatal(err)
 			}
 		}
@@ -118,11 +120,7 @@ func extractArchiveToDir(archiveFilePath string, destinationFolderPath string) e
 			}
 		case tar.TypeReg:
 			var w *os.File
-			parentDirectory := path.Dir(name)
-			if err = os.MkdirAll(parentDirectory, hdr.FileInfo().Mode()); err != nil {
-				return err
-			}
-			if err = ensureDirsExist(path.Dir(name)); err != nil {
+			if err = os.MkdirAll(path.Dir(name), hdr.FileInfo().Mode()); err != nil {
 				return err
 			}
 			if w, err = os.Create(name); err != nil {
@@ -142,10 +140,12 @@ func extractArchiveToDir(archiveFilePath string, destinationFolderPath string) e
 		case tar.TypeLink:
 			fmt.Println("TypeLink: " + name)
 		case tar.TypeSymlink:
-			if err := os.Symlink(hdr.Linkname, name); err != nil && !os.IsExist(err) {
-				return err
+			targetPath := path.Join(path.Dir(name), hdr.Linkname)
+			// To solve https://nvd.nist.gov/vuln/detail/CVE-2020-27833
+			if !strings.HasPrefix(targetPath, destinationFolderPath) {
+				return fmt.Errorf("invalid symlink %q -> %q", name, hdr.Linkname)
 			}
-			if err = os.Chmod(name, hdr.FileInfo().Mode()); err != nil {
+			if err = os.Symlink(hdr.Linkname, name); err != nil {
 				return err
 			}
 		default:

@@ -17,7 +17,7 @@ type ConfigStruct struct {
 	RuntimePath         string                           `arg:"--runtime-path,env:RUNTIME_PATH"`
 	DataPath            string                           `arg:"--data-path,env:PGDATA"`
 	BinariesPath        string                           `arg:"--binary-path,env:BINARY_PATH"`
-	Locale              string                           `default:"en_US.UTF-8,env:LANGUAGE"`
+	Locale              string                           `arg:"--locale,env:LC_ALL" default:"en_US.UTF-8"`
 	BinaryRepositoryURL string                           `arg:"--binary-repository-url,env:BINARY_REPOSITORY_URL" default:"https://repo1.maven.org/maven2"`
 }
 

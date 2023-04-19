@@ -1,3 +1,5 @@
+// Package pvm version_strategy.go from github.com/fergusstrange/embedded-postgres and modified
+// (so should be considered under same license)
 package pvm
 
 import (

@@ -21,7 +21,6 @@ func SetDirectories(args *Args, userHomeDir string) (bool, error) {
 			}
 			args.PostgresVersion = embeddedpostgres.PostgresVersion(versionsFromMaven[len(versionsFromMaven)-1])
 		} else {
-			fmt.Println("changing")
 			args.PostgresVersion = PostgresVersions[NumberOfPostgresVersions-1]
 		}
 	} else if !isValidVersion(string(args.PostgresVersion)) {

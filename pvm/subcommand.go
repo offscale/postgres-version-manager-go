@@ -25,16 +25,22 @@ func InstallSubcommand(args Args, wasLatest bool, cacheLocation string) error {
 
 func StartSubcommand(args Args, cacheLocation string) error {
 	var err error
-	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath); err != nil {
+	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.RuntimePath); err != nil {
 		return err
 	}
 	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot)(); err != nil {
 		return err
 	}
+	if err = defaultInitDatabase(args.BinariesPath, args.RuntimePath, args.DataPath, args.Username, args.Password, args.Locale, os.Stdout); err != nil {
+		return err
+	}
 	if err = startPostgres(&args.ConfigStruct); err != nil {
 		return err
 	}
-	return createDatabase(args.Port, args.Username, args.Password, args.Database)
+	if err = defaultCreateDatabase(args.Port, args.Username, args.Password, args.Database); err != nil {
+		return err
+	}
+	return nil
 }
 
 func LsSubcommand(err error, args Args) error {

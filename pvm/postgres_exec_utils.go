@@ -1,3 +1,5 @@
+// Package pvm these functions from github.com/fergusstrange/embedded-postgres and modified
+// (so should be considered under same license)
 package pvm
 
 import (
@@ -7,7 +9,6 @@ import (
 	"path/filepath"
 )
 
-// Originally from embeddedpostgres so should be under its license
 func startPostgres(config *ConfigStruct) error {
 	postgresBinary := filepath.Join(config.BinariesPath, "bin", "pg_ctl")
 	postgresProcess := exec.Command(postgresBinary, "start", "-w",
