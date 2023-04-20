@@ -2,11 +2,9 @@ package pvm
 
 import (
 	"runtime"
-
-	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 )
 
-func downloadExtractIfNonexistent(postgresVersion embeddedpostgres.PostgresVersion, binaryRepositoryURL, cacheLocation string, versionManagerRoot string) embeddedpostgres.RemoteFetchStrategy {
+func downloadExtractIfNonexistent(postgresVersion string, binaryRepositoryURL, cacheLocation string, versionManagerRoot string) RemoteFetchStrategy {
 	versionStrategy := defaultVersionStrategy(
 		postgresVersion,
 		runtime.GOOS,

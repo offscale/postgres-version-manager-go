@@ -13,7 +13,7 @@ Tested on Go 1.20, `git clone` this repo then `go build .`
 ## Usage
 
     PostgreSQL version manager
-    Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--versionmanagerroot VERSIONMANAGERROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--no-remote] <command> [<args>]
+    Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--versionmanagerroot VERSIONMANAGERROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--no-remote] <command> [<args>]
     
     Commands:
     env                    Print out database connection string
@@ -36,6 +36,7 @@ Common to all subcommands
     --runtime-path RUNTIME-PATH [default: /home/samuel/postgres-version-manager/latest/run, env: RUNTIME_PATH]
     --data-path DATA-PATH [default: /home/samuel/postgres-version-manager/latest/data, env: PGDATA]
     --binary-path BINARY-PATH [default: /home/samuel/postgres-version-manager/latest, env: BINARY_PATH]
+    --logs-path LOGS-PATH [default: /home/samuel/postgres-version-manager/latest/logs, env: LOGS_PATH]
     --locale LOCALE [default: en_US.UTF-8, env: LC_ALL]
     --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
     --no-remote            Disable HTTPS calls for everything except 'install' [default: false]

@@ -4,9 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"path"
-
-	"github.com/fergusstrange/embedded-postgres"
 )
+
+func SetDefaultsFromEnvironment(args *Args, userHomeDir string) {
+	args.PostgresVersion = "latest"
+	args.VersionManagerRoot = path.Join(userHomeDir, "postgres-version-manager")
+	args.BinariesPath = path.Join(args.VersionManagerRoot, args.PostgresVersion)
+	args.DataPath = path.Join(args.BinariesPath, "data")
+	args.RuntimePath = path.Join(args.BinariesPath, "run")
+	args.LogsPath = path.Join(args.BinariesPath, "logs")
+}
 
 func SetDirectories(args *Args, userHomeDir string) (bool, error) {
 	var err error
@@ -16,35 +23,30 @@ func SetDirectories(args *Args, userHomeDir string) (bool, error) {
 	if args.PostgresVersion == "latest" {
 		wasLatest = true
 		if args.NoRemote {
+			args.PostgresVersion = PostgresVersions[NumberOfPostgresVersions-1]
+		} else {
 			if err, versionsFromMaven = getVersionsFromMaven(args.BinaryRepositoryURL); err != nil {
 				return false, err
 			}
-			args.PostgresVersion = embeddedpostgres.PostgresVersion(versionsFromMaven[len(versionsFromMaven)-1])
-		} else {
-			args.PostgresVersion = PostgresVersions[NumberOfPostgresVersions-1]
+			args.PostgresVersion = string(versionsFromMaven[len(versionsFromMaven)-1])
 		}
-	} else if !isValidVersion(string(args.PostgresVersion)) {
+	} else if !isValidVersion(args.PostgresVersion) {
 		return false, errors.New(fmt.Sprintf("invalid/unsupported PostgreSQL version: %s\n", args.PostgresVersion))
 	}
 
-	// If not provided, use $HOME/postgres-version-manager-go/version
+	// If not provided, use $HOME/postgres-version-manager-go/$POSTGRES_VERSION/
 	latestBinariesPath := path.Join(args.VersionManagerRoot, "latest")
 	if latestBinariesPath == args.BinariesPath {
-		args.BinariesPath = path.Join(userHomeDir, "postgres-version-manager", string(args.PostgresVersion))
+		args.BinariesPath = path.Join(userHomeDir, "postgres-version-manager", args.PostgresVersion)
 		if path.Join(latestBinariesPath, "data") == args.DataPath {
 			args.DataPath = path.Join(args.BinariesPath, "data")
 		}
-		if path.Join(latestBinariesPath, "run") == args.RuntimePath {
+		if path.Join(latestBinariesPath, "run") == args.BinariesPath {
 			args.RuntimePath = path.Join(args.BinariesPath, "run")
+		}
+		if path.Join(latestBinariesPath, "logs") == args.LogsPath {
+			args.LogsPath = path.Join(args.BinariesPath, "logs")
 		}
 	}
 	return wasLatest, err
-}
-
-func SetDefaultsFromEnvironment(args *Args, userHomeDir string) {
-	args.PostgresVersion = "latest"
-	args.VersionManagerRoot = path.Join(userHomeDir, "postgres-version-manager")
-	args.BinariesPath = path.Join(args.VersionManagerRoot, string(args.PostgresVersion))
-	args.DataPath = path.Join(args.BinariesPath, "data")
-	args.RuntimePath = path.Join(args.BinariesPath, "run")
 }

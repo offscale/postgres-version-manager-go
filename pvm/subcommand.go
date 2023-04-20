@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"unicode"
 )
 
 func InstallSubcommand(args Args, wasLatest bool, cacheLocation string) error {
 	var err error
 	postgresVersion := args.PostgresVersion
-	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath); err != nil {
+	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.LogsPath); err != nil {
 		return err
 	}
 	if args.Install.PostgresVersion != "" && (args.Install.PostgresVersion != "latest" || !wasLatest) {
@@ -25,14 +26,17 @@ func InstallSubcommand(args Args, wasLatest bool, cacheLocation string) error {
 
 func StartSubcommand(args Args, cacheLocation string) error {
 	var err error
-	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.RuntimePath); err != nil {
+	fmt.Printf("args.LogsPath: \"%s\"\n", args.LogsPath)
+	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.RuntimePath, args.LogsPath); err != nil {
 		return err
 	}
 	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot)(); err != nil {
 		return err
 	}
-	if err = defaultInitDatabase(args.BinariesPath, args.RuntimePath, args.DataPath, args.Username, args.Password, args.Locale, os.Stdout); err != nil {
-		return err
+	if _, err := os.Stat(path.Join(args.DataPath, "pg_wal")); errors.Is(err, os.ErrNotExist) {
+		if err = defaultInitDatabase(args.BinariesPath, args.RuntimePath, args.DataPath, args.Username, args.Password, args.Locale, os.Stdout); err != nil {
+			return err
+		}
 	}
 	if err = startPostgres(&args.ConfigStruct); err != nil {
 		return err
@@ -51,7 +55,7 @@ func LsSubcommand(err error, args Args) error {
 	}
 	for _, dir := range dirs {
 		if dir.Name() != "downloads" && dir.IsDir() && unicode.IsDigit(rune(dir.Name()[0])) {
-			fmt.Println(dir)
+			fmt.Println(dir.Name())
 		}
 	}
 	return err
@@ -74,4 +78,8 @@ func LsRemoteSubcommand(args Args) error {
 		}
 	}
 	return nil
+}
+
+func EnvSubcommand(config ConfigStruct) string {
+	return fmt.Sprintf("postgresql://%s:%s@%s:%d/%s\n", config.Username, config.Password, "localhost", config.Port, config.Database)
 }

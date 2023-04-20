@@ -15,7 +15,7 @@ func startPostgres(config *ConfigStruct) error {
 		"-D", config.DataPath,
 		"-o", fmt.Sprintf(`"-p %d"`, config.Port))
 
-	syncedLog, err := newSyncedLogger(config.DataPath, os.Stdout)
+	syncedLog, err := newSyncedLogger(config.LogsPath, os.Stdout)
 	if err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func StopPostgres(config *ConfigStruct) error {
 		"-D", config.DataPath,
 		"-o", fmt.Sprintf(`"-p %d"`, config.Port))
 
-	syncedLog, err := newSyncedLogger(config.DataPath, os.Stdout)
+	syncedLog, err := newSyncedLogger(config.LogsPath, os.Stdout)
 	if err != nil {
 		return err
 	}

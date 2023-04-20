@@ -82,9 +82,15 @@ func defaultCreateDatabase(port uint32, username, password, database string) (er
 	defer func() {
 		err = connectionClose(db, err)
 	}()
-
-	if _, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s", database)); err != nil {
-		return errorCustomDatabase(database, err)
+	var rows *sql.Rows
+	if rows, err = db.Query("SELECT * FROM pg_database WHERE datname = $1", database); err != nil {
+		return err
+	}
+	if !rows.Next() {
+		fmt.Println(fmt.Sprintf("CREATE DATABASE %s", database))
+		if _, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s", database)); err != nil {
+			return errorCustomDatabase(database, err)
+		}
 	}
 
 	return nil

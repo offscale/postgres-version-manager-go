@@ -19,13 +19,18 @@ import (
 	"path/filepath"
 	"strings"
 
-	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 	"github.com/xi2/xz"
 )
 
+// RemoteFetchStrategy provides a strategy to fetch a Postgres binary so that it is available for use.
+type RemoteFetchStrategy func() error
+
 //nolint:funlen
-func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy embeddedpostgres.VersionStrategy, cacheLocator embeddedpostgres.CacheLocator, versionManagerRoot string) embeddedpostgres.RemoteFetchStrategy {
+func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy VersionStrategy, cacheLocator CacheLocator, versionManagerRoot string) RemoteFetchStrategy {
 	return func() error {
+		if _, existsAlready := cacheLocator(); existsAlready {
+			return nil
+		}
 		operatingSystem, architecture, version := versionStrategy()
 
 		jarDownloadURL := fmt.Sprintf("%s/io/zonky/test/postgres/embedded-postgres-binaries-%s-%s/%s/embedded-postgres-binaries-%s-%s-%s.jar",
@@ -162,7 +167,7 @@ func closeBody(resp *http.Response) func() {
 	}
 }
 
-func decompressResponse(bodyBytes []byte, contentLength int64, cacheLocator embeddedpostgres.CacheLocator, downloadURL string) (string, error) {
+func decompressResponse(bodyBytes []byte, contentLength int64, cacheLocator CacheLocator, downloadURL string) (string, error) {
 	zipReader, err := zip.NewReader(bytes.NewReader(bodyBytes), contentLength)
 	if err != nil {
 		return "", errorFetchingPostgres(err)

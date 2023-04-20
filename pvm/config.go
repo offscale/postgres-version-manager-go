@@ -1,24 +1,21 @@
 package pvm
 
-import (
-	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
-)
-
 var versionsFromMaven []string = nil
 
 // ConfigStruct originally from github.com/fergusstrange/embedded-postgres@v1.20.0/config.go
 type ConfigStruct struct {
-	PostgresVersion     embeddedpostgres.PostgresVersion `arg:"--postgres-version,env:POSTGRES_VERSION" default:"latest"`
-	Port                uint32                           `arg:"-p,env:PGPORT" default:"5432"`
-	Database            string                           `arg:"-d,env:POSTGRES_DATABASE" default:"database"`
-	Username            string                           `arg:"-u,env:POSTGRES_USERNAME" default:"username"`
-	Password            string                           `arg:"env:POSTGRES_PASSWORD" default:"password"`
-	VersionManagerRoot  string                           `arg:"env:VERSION_MANAGER_ROOT"`
-	RuntimePath         string                           `arg:"--runtime-path,env:RUNTIME_PATH"`
-	DataPath            string                           `arg:"--data-path,env:PGDATA"`
-	BinariesPath        string                           `arg:"--binary-path,env:BINARY_PATH"`
-	Locale              string                           `arg:"--locale,env:LC_ALL" default:"en_US.UTF-8"`
-	BinaryRepositoryURL string                           `arg:"--binary-repository-url,env:BINARY_REPOSITORY_URL" default:"https://repo1.maven.org/maven2"`
+	PostgresVersion     string `arg:"--postgres-version,env:POSTGRES_VERSION" default:"latest"`
+	Port                uint32 `arg:"-p,env:PGPORT" default:"5432"`
+	Database            string `arg:"-d,env:POSTGRES_DATABASE" default:"database"`
+	Username            string `arg:"-u,env:POSTGRES_USERNAME" default:"username"`
+	Password            string `arg:"env:POSTGRES_PASSWORD" default:"password"`
+	VersionManagerRoot  string `arg:"env:VERSION_MANAGER_ROOT"`
+	RuntimePath         string `arg:"--runtime-path,env:RUNTIME_PATH"`
+	DataPath            string `arg:"--data-path,env:PGDATA"`
+	BinariesPath        string `arg:"--binary-path,env:BINARY_PATH"`
+	LogsPath            string `arg:"--logs-path,env:LOGS_PATH"`
+	Locale              string `arg:"--locale,env:LC_ALL" default:"en_US.UTF-8"`
+	BinaryRepositoryURL string `arg:"--binary-repository-url,env:BINARY_REPOSITORY_URL" default:"https://repo1.maven.org/maven2"`
 }
 
 type StartCmd struct {
@@ -30,7 +27,7 @@ type StopCmd struct {
 }
 
 type InstallCmd struct {
-	PostgresVersion embeddedpostgres.PostgresVersion `arg:"positional" default:""`
+	PostgresVersion string `arg:"positional" default:""`
 }
 
 type LsCmd struct {

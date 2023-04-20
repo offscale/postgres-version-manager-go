@@ -37,6 +37,7 @@ func main() {
 		if err = pvm.StartSubcommand(args, cacheLocation); err != nil {
 			log.Fatal(err)
 		}
+		fmt.Printf("Started PostgreSQL server, access via:\n%s", pvm.EnvSubcommand(args.ConfigStruct))
 	case args.Stop != nil:
 		if err = pvm.StopPostgres(&args.ConfigStruct); err != nil {
 			log.Fatal(err)
@@ -54,7 +55,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case args.Env != nil:
-		fmt.Printf("postgresql://%s:%s@%s:%d/%s\n", args.Username, args.Password, "localhost", args.Port, args.Database)
+		fmt.Print(pvm.EnvSubcommand(args.ConfigStruct))
 	default:
 		log.Fatal("missing subcommand")
 	}

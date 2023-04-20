@@ -4,13 +4,11 @@ import (
 	"encoding/xml"
 	"io"
 	"net/http"
-
-	embeddedpostgres "github.com/fergusstrange/embedded-postgres"
 )
 
 const NumberOfPostgresVersions uintptr = 135
 
-var PostgresVersions [NumberOfPostgresVersions]embeddedpostgres.PostgresVersion = [NumberOfPostgresVersions]embeddedpostgres.PostgresVersion{
+var PostgresVersions [NumberOfPostgresVersions]string = [NumberOfPostgresVersions]string{
 	"9.3.23",
 	"9.3.24",
 	"9.3.24-1",
