@@ -19,15 +19,16 @@ type ConfigStruct struct {
 }
 
 type StartCmd struct {
-	Pid int `arg:"--pid" default:"-1" help:"If PID provided and exists, will stop that process."`
+	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
+	NoInstall       bool   `arg:"--no-install" default:"false" help:"Inverts default of installing nonexistent version"`
 }
 
 type StopCmd struct {
-	Pid int `arg:"--pid" default:"-1"`
+	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
 }
 
 type InstallCmd struct {
-	PostgresVersion string `arg:"positional" default:""`
+	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
 }
 
 type LsCmd struct {

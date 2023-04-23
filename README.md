@@ -8,13 +8,13 @@ Like [`rvm`](https://rvm.io)/[`nvm`](https://github.com/nvm-sh/nvm) but for Post
 
 ## Development
 
-Tested on Go 1.20, `git clone` this repo then `go build .`
+Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
 
 ## Usage
 
     PostgreSQL version manager
     Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--versionmanagerroot VERSIONMANAGERROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--no-remote] <command> [<args>]
-    
+
     Commands:
     env                    Print out database connection string
     start                  Start specified PostgreSQL server
@@ -32,11 +32,11 @@ Common to all subcommands
     --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
     --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
     --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
-    --versionmanagerroot VERSIONMANAGERROOT [default: /home/samuel/postgres-version-manager, env: VERSION_MANAGER_ROOT]
-    --runtime-path RUNTIME-PATH [default: /home/samuel/postgres-version-manager/latest/run, env: RUNTIME_PATH]
-    --data-path DATA-PATH [default: /home/samuel/postgres-version-manager/latest/data, env: PGDATA]
-    --binary-path BINARY-PATH [default: /home/samuel/postgres-version-manager/latest, env: BINARY_PATH]
-    --logs-path LOGS-PATH [default: /home/samuel/postgres-version-manager/latest/logs, env: LOGS_PATH]
+    --versionmanagerroot VERSIONMANAGERROOT [default: $HOME/postgres-version-manager, env: VERSION_MANAGER_ROOT]
+    --runtime-path RUNTIME-PATH [default: $HOME/postgres-version-manager/latest/run, env: RUNTIME_PATH]
+    --data-path DATA-PATH [default: $HOME/postgres-version-manager/latest/data, env: PGDATA]
+    --binary-path BINARY-PATH [default: $HOME/postgres-version-manager/latest, env: BINARY_PATH]
+    --logs-path LOGS-PATH [default: $HOME/postgres-version-manager/latest/logs, env: LOGS_PATH]
     --locale LOCALE [default: en_US.UTF-8, env: LC_ALL]
     --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
     --no-remote            Disable HTTPS calls for everything except 'install' [default: false]
@@ -52,28 +52,31 @@ Print out database connection string
 
 Start specified PostgreSQL server
 
-    Usage: pvm-go start [--pid PID]
+    Usage: cmd start [--no-install] [POSTGRES_VERSION]
+    
+    Positional arguments:
+    POSTGRES_VERSION
     
     Options:
-    --pid PID              If PID provided and exists, will stop that process. [default: -1]
+    --no-install           Inverts default of installing nonexistent version [default: false]
 
 ### `stop`
 
 Stop specific (running) PostgreSQL server
 
-    Usage: pvm-go stop [--pid PID]
+    Usage: cmd stop [POSTGRES_VERSION]
     
-    Options:
-    --pid PID [default: -1]
+    Positional arguments:
+    POSTGRES_VERSION
 
 ### `install`
 
 Install specified PostgreSQL version
-
-    Usage: pvm-go install [POSTGRESVERSION]
+    
+    Usage: cmd install [POSTGRES_VERSION]
     
     Positional arguments:
-    POSTGRESVERSION
+    POSTGRES_VERSION
 
 ### `ls`
 

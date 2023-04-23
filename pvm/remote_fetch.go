@@ -26,12 +26,18 @@ import (
 type RemoteFetchStrategy func() error
 
 //nolint:funlen
-func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy VersionStrategy, cacheLocator CacheLocator, versionManagerRoot string) RemoteFetchStrategy {
+func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy VersionStrategy, cacheLocator CacheLocator, versionManagerRoot string, noInstall bool) RemoteFetchStrategy {
 	return func() error {
 		if _, existsAlready := cacheLocator(); existsAlready {
 			return nil
 		}
 		operatingSystem, architecture, version := versionStrategy()
+		if noInstall {
+			return fmt.Errorf("noInstall toggled and installation not found for %s-%s-%s",
+				operatingSystem,
+				architecture,
+				version)
+		}
 
 		jarDownloadURL := fmt.Sprintf("%s/io/zonky/test/postgres/embedded-postgres-binaries-%s-%s/%s/embedded-postgres-binaries-%s-%s-%s.jar",
 			remoteFetchHost,

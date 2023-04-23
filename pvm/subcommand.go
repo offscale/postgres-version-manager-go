@@ -21,7 +21,7 @@ func InstallSubcommand(args Args, wasLatest bool, cacheLocation string) error {
 		}
 		postgresVersion = args.Install.PostgresVersion
 	}
-	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot)()
+	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot, true)()
 }
 
 func StartSubcommand(args Args, cacheLocation string) error {
@@ -30,7 +30,7 @@ func StartSubcommand(args Args, cacheLocation string) error {
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.RuntimePath, args.LogsPath); err != nil {
 		return err
 	}
-	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot)(); err != nil {
+	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot, args.Start.NoInstall)(); err != nil {
 		return err
 	}
 	if _, err := os.Stat(path.Join(args.DataPath, "pg_wal")); errors.Is(err, os.ErrNotExist) {

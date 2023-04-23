@@ -4,7 +4,7 @@ import (
 	"runtime"
 )
 
-func downloadExtractIfNonexistent(postgresVersion string, binaryRepositoryURL, cacheLocation string, versionManagerRoot string) RemoteFetchStrategy {
+func downloadExtractIfNonexistent(postgresVersion string, binaryRepositoryURL, cacheLocation string, versionManagerRoot string, noInstall bool) RemoteFetchStrategy {
 	versionStrategy := defaultVersionStrategy(
 		postgresVersion,
 		runtime.GOOS,
@@ -13,5 +13,5 @@ func downloadExtractIfNonexistent(postgresVersion string, binaryRepositoryURL, c
 		shouldUseAlpineLinuxBuild,
 	)
 	cacheLocator := defaultCacheLocator(cacheLocation, versionStrategy)
-	return defaultRemoteFetchStrategy(binaryRepositoryURL, versionStrategy, cacheLocator, versionManagerRoot)
+	return defaultRemoteFetchStrategy(binaryRepositoryURL, versionStrategy, cacheLocator, versionManagerRoot, noInstall)
 }
