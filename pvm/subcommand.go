@@ -9,19 +9,13 @@ import (
 	"unicode"
 )
 
-func InstallSubcommand(args Args, wasLatest bool, cacheLocation string) error {
+func InstallSubcommand(args Args, cacheLocation string) error {
 	var err error
 	postgresVersion := args.PostgresVersion
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.LogsPath); err != nil {
 		return err
 	}
-	if args.Install.PostgresVersion != "" && (args.Install.PostgresVersion != "latest" || !wasLatest) {
-		if !isValidVersion(string(args.Install.PostgresVersion)) {
-			return errors.New(fmt.Sprintf("invalid/unsupported PostgreSQL version: %s\n", args.Install.PostgresVersion))
-		}
-		postgresVersion = args.Install.PostgresVersion
-	}
-	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot, true)()
+	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot, false)()
 }
 
 func StartSubcommand(args Args, cacheLocation string) error {

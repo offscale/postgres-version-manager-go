@@ -85,7 +85,7 @@ func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy VersionS
 			return err
 		}
 
-		destinationFolderPath := path.Join(versionManagerRoot, string(version))
+		destinationFolderPath := path.Join(versionManagerRoot, version)
 		if _, err = os.Stat(path.Join(destinationFolderPath, "bin")); err == nil {
 			return nil
 		}
@@ -160,7 +160,7 @@ func extractArchiveToDir(archiveFilePath string, destinationFolderPath string) e
 				return err
 			}
 		default:
-			fmt.Println("doing nothing with: " + name + " of " + string(hdr.Typeflag))
+			fmt.Printf("doing nothing with: %s of %d\n", name, hdr.Typeflag)
 		}
 	}
 }

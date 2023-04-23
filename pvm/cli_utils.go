@@ -15,23 +15,19 @@ func SetDefaultsFromEnvironment(args *Args, userHomeDir string) {
 	args.LogsPath = path.Join(args.BinariesPath, "logs")
 }
 
-func SetDirectories(args *Args, userHomeDir string) (bool, error) {
-	var err error
-	wasLatest := false
-
-	// Need to know what "latest" is if not doing `--ls-remote` and "latest" is PostgresVersion
+func SetVersionAndDirectories(args *Args, userHomeDir string) error {
 	if args.PostgresVersion == "latest" {
-		wasLatest = true
 		if args.NoRemote {
 			args.PostgresVersion = PostgresVersions[NumberOfPostgresVersions-1]
 		} else {
+			var err error
 			if err, versionsFromMaven = getVersionsFromMaven(args.BinaryRepositoryURL); err != nil {
-				return false, err
+				return err
 			}
-			args.PostgresVersion = string(versionsFromMaven[len(versionsFromMaven)-1])
+			args.PostgresVersion = versionsFromMaven[len(versionsFromMaven)-1]
 		}
 	} else if !isValidVersion(args.PostgresVersion) {
-		return false, errors.New(fmt.Sprintf("invalid/unsupported PostgreSQL version: %s\n", args.PostgresVersion))
+		return errors.New(fmt.Sprintf("invalid/unsupported PostgreSQL version: %s\n", args.PostgresVersion))
 	}
 
 	// If not provided, use $HOME/postgres-version-manager-go/$POSTGRES_VERSION/
@@ -48,5 +44,15 @@ func SetDirectories(args *Args, userHomeDir string) (bool, error) {
 			args.LogsPath = path.Join(args.BinariesPath, "logs")
 		}
 	}
-	return wasLatest, err
+	return nil
+}
+
+func PostgresVersionFromLocalOrGlobal(localOptionPostgresVersion string, postgresVersion string) (string, error) {
+	if localOptionPostgresVersion != "" {
+		if localOptionPostgresVersion != "latest" && !isValidVersion(localOptionPostgresVersion) {
+			return "", errors.New(fmt.Sprintf("invalid/unsupported PostgreSQL version: %s\n", localOptionPostgresVersion))
+		}
+		return localOptionPostgresVersion, nil
+	}
+	return postgresVersion, nil
 }

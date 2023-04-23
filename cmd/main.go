@@ -13,7 +13,6 @@ import (
 
 func main() {
 	var args pvm.Args
-	var wasLatest bool
 	var err error
 	var userHomeDir string
 
@@ -25,7 +24,22 @@ func main() {
 
 	arg.MustParse(&args)
 
-	if wasLatest, err = pvm.SetDirectories(&args, userHomeDir); err != nil {
+	// Logic to prioritise POSTGRES_VERSION as a positional
+	if args.PostgresVersion, err = pvm.PostgresVersionFromLocalOrGlobal(func() string {
+		switch {
+		case args.Install != nil:
+			return args.Install.PostgresVersion
+		case args.Start != nil:
+			return args.Start.PostgresVersion
+		case args.Stop != nil:
+			return args.Stop.PostgresVersion
+		default:
+			return args.PostgresVersion
+		}
+	}(), args.PostgresVersion); err != nil {
+		log.Fatal(err)
+	}
+	if err = pvm.SetVersionAndDirectories(&args, userHomeDir); err != nil {
 		log.Fatal(err)
 	}
 	if args.PostgresVersion == "latest" {
@@ -43,7 +57,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case args.Install != nil:
-		if err = pvm.InstallSubcommand(args, wasLatest, cacheLocation); err != nil {
+		if err = pvm.InstallSubcommand(args, cacheLocation); err != nil {
 			log.Fatal(err)
 		}
 	case args.Ls != nil:
