@@ -54,3 +54,7 @@ type Args struct {
 func (Args) Description() string {
 	return "PostgreSQL version manager"
 }
+
+func (Args) Version() string {
+	return "pvm 0.0.8"
+}

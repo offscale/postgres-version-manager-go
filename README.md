@@ -52,7 +52,7 @@ Print out database connection string
 
 Start specified PostgreSQL server
 
-    Usage: cmd start [--no-install] [POSTGRES_VERSION]
+    Usage: pvm-go start [--no-install] [POSTGRES_VERSION]
     
     Positional arguments:
     POSTGRES_VERSION
@@ -64,7 +64,7 @@ Start specified PostgreSQL server
 
 Stop specific (running) PostgreSQL server
 
-    Usage: cmd stop [POSTGRES_VERSION]
+    Usage: pvm-go stop [POSTGRES_VERSION]
     
     Positional arguments:
     POSTGRES_VERSION
@@ -73,7 +73,7 @@ Stop specific (running) PostgreSQL server
 
 Install specified PostgreSQL version
     
-    Usage: cmd install [POSTGRES_VERSION]
+    Usage: pvm-go install [POSTGRES_VERSION]
     
     Positional arguments:
     POSTGRES_VERSION
