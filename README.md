@@ -22,6 +22,8 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     install                Install specified PostgreSQL version
     ls                     List what versions of PostgreSQL are installed
     ls-remote              List what versions of PostgreSQL are available
+    get-data-path          Get data path, i.e., where pg_hba and postgres.conf are for specified PostgreSQL version
+    install-service        Install service (daemon), e.g., systemd
 
 #### Global options
 
@@ -90,7 +92,31 @@ List what versions of PostgreSQL are available
 
     Usage: pvm-go ls-remote
 
----    
+### `get-data-path`
+
+Get data path, i.e., where pg_hba and postgres.conf are for specified PostgreSQL version
+
+    Usage: pvm-go get-data-path
+
+### `install-service`
+
+Install service (daemon), e.g., systemd
+
+    Usage: pvm-go install-service
+
+    Commands:
+    systemd                Install systemd service
+
+#### `systemd`
+
+Install systemd service
+
+    Usage: pvm-go install-service systemd [--service-install-path SERVICE-INSTALL-PATH]
+    
+    Options:
+    --service-install-path SERVICE-INSTALL-PATH [default: /etc/systemd/system/postgresql.service]
+
+---
 
 ## License
 
