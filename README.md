@@ -96,7 +96,10 @@ List what versions of PostgreSQL are available
 
 Get data path, i.e., where pg_hba and postgres.conf are for specified PostgreSQL version
 
-    Usage: pvm-go get-data-path
+    Usage: pvm-go get-path [DIRECTORYTOFIND]
+    
+    Positional arguments:
+    DIRECTORYTOFIND        One of: bin, data, log, runtime
 
 ### `install-service`
 

@@ -20,7 +20,9 @@ type ConfigStruct struct {
 
 type EnvCmd struct{}
 
-type GetDataPathCmd struct{}
+type GetPathCmd struct {
+	DirectoryToFind string `arg:"positional" help:"bin|data|log|runtime"`
+}
 
 type InstallCmd struct {
 	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
@@ -51,7 +53,7 @@ type Args struct {
 	ConfigStruct
 	NoRemote       bool               `arg:"--no-remote" default:"false" help:"Disable HTTPS calls for everything except 'install'"`
 	Env            *EnvCmd            `arg:"subcommand:env" help:"Print out database connection string"`
-	GetDataPath    *GetDataPathCmd    `arg:"subcommand:get-data-path" help:"Get data path, i.e., where pg_hba and postgres.conf are for specified PostgreSQL version"`
+	GetPath        *GetPathCmd        `arg:"subcommand:get-path" help:"One of: bin, data, log, runtime"`
 	Install        *InstallCmd        `arg:"subcommand:install" help:"Install specified PostgreSQL version"`
 	InstallService *InstallServiceCmd `arg:"subcommand:install-service" help:"Install service (daemon), e.g., systemd"`
 	Ls             *LsCmd             `arg:"subcommand:ls" help:"List what versions of PostgreSQL are installed"`
@@ -65,5 +67,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.9"
+	return "pvm 0.0.10"
 }

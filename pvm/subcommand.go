@@ -13,6 +13,21 @@ func EnvSubcommand(config ConfigStruct) string {
 	return fmt.Sprintf("postgresql://%s:%s@%s:%d/%s", config.Username, config.Password, "localhost", config.Port, config.Database)
 }
 
+func GetPathSubcommand(directoryToFind string, config ConfigStruct) (string, error) {
+	switch directoryToFind {
+	case "bin":
+		return config.BinariesPath, nil
+	case "data":
+		return config.DataPath, nil
+	case "log":
+		return config.LogsPath, nil
+	case "runtime":
+		return config.RuntimePath, nil
+	default:
+		return "", fmt.Errorf("Unsupported path \"%s\"; choose one of: bin, data, log, runtime\n", directoryToFind)
+	}
+}
+
 func InstallSubcommand(args Args, cacheLocation string) error {
 	var err error
 	postgresVersion := args.PostgresVersion

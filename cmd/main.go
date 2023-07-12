@@ -49,8 +49,13 @@ func main() {
 	switch {
 	case args.Env != nil:
 		fmt.Println(pvm.EnvSubcommand(args.ConfigStruct))
-	case args.GetDataPath != nil:
-		fmt.Println(args.ConfigStruct.DataPath)
+	case args.GetPath != nil:
+		var pathLocation string
+		if pathLocation, err = pvm.GetPathSubcommand(args.GetPath.DirectoryToFind, args.ConfigStruct); err != nil {
+			log.Fatal(err)
+		} else {
+			fmt.Println(pathLocation)
+		}
 	case args.Install != nil:
 		if err = pvm.InstallSubcommand(args, cacheLocation); err != nil {
 			log.Fatal(err)
