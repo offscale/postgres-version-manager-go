@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-const NumberOfPostgresVersions uintptr = 135
+const NumberOfPostgresVersions uintptr = 140
 
 var PostgresVersions [NumberOfPostgresVersions]string = [NumberOfPostgresVersions]string{
 	"9.3.23",
@@ -104,6 +104,7 @@ var PostgresVersions [NumberOfPostgresVersions]string = [NumberOfPostgresVersion
 	"11.17.0",
 	"11.18.0",
 	"11.19.0",
+	"11.20.0",
 	"12.0.0",
 	"12.1.0",
 	"12.1.0-1",
@@ -121,6 +122,7 @@ var PostgresVersions [NumberOfPostgresVersions]string = [NumberOfPostgresVersion
 	"12.12.0",
 	"12.13.0",
 	"12.14.0",
+	"12.15.0",
 	"13.0.0",
 	"13.1.0",
 	"13.1.0-1",
@@ -133,6 +135,7 @@ var PostgresVersions [NumberOfPostgresVersions]string = [NumberOfPostgresVersion
 	"13.8.0",
 	"13.9.0",
 	"13.10.0",
+	"13.11.0",
 	"14.0.0",
 	"14.1.0",
 	"14.2.0",
@@ -141,9 +144,11 @@ var PostgresVersions [NumberOfPostgresVersions]string = [NumberOfPostgresVersion
 	"14.5.0",
 	"14.6.0",
 	"14.7.0",
+	"14.8.0",
 	"15.0.0",
 	"15.1.0",
-	"15.2.0"}
+	"15.2.0",
+	"15.3.0"}
 
 // Micro-optimization to avoid looping
 func isValidVersion(v string) bool {
@@ -244,6 +249,7 @@ func isValidVersion(v string) bool {
 		"11.17.0",
 		"11.18.0",
 		"11.19.0",
+		"11.20.0",
 		"12.0.0",
 		"12.1.0",
 		"12.1.0-1",
@@ -261,6 +267,7 @@ func isValidVersion(v string) bool {
 		"12.12.0",
 		"12.13.0",
 		"12.14.0",
+		"12.15.0",
 		"13.0.0",
 		"13.1.0",
 		"13.1.0-1",
@@ -273,6 +280,7 @@ func isValidVersion(v string) bool {
 		"13.8.0",
 		"13.9.0",
 		"13.10.0",
+		"13.11.0",
 		"14.0.0",
 		"14.1.0",
 		"14.2.0",
@@ -281,9 +289,11 @@ func isValidVersion(v string) bool {
 		"14.5.0",
 		"14.6.0",
 		"14.7.0",
+		"14.8.0",
 		"15.0.0",
 		"15.1.0",
-		"15.2.0":
+		"15.2.0",
+		"15.3.0":
 		return true
 	}
 	return false

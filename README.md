@@ -4,7 +4,7 @@ postgres-version-manager-go
 [![License](https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT%20OR%20CC0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![goreleaser](https://github.com/offscale/postgres-version-manager-go/actions/workflows/release.yml/badge.svg)](https://github.com/offscale/postgres-version-manager-go/actions/workflows/release.yml)
 
-Like [`rvm`](https://rvm.io)/[`nvm`](https://github.com/nvm-sh/nvm) but for PostgreSQL. Installs any of 135+ different versions of PostgreSQL for your system.
+Like [`rvm`](https://rvm.io)/[`nvm`](https://github.com/nvm-sh/nvm) but for PostgreSQL. Installs any of 140+ different versions of PostgreSQL for your system.
 
 ## Development
 
@@ -14,16 +14,17 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
 
     PostgreSQL version manager
     Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--versionmanagerroot VERSIONMANAGERROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--no-remote] <command> [<args>]
-
+    
     Commands:
     env                    Print out database connection string
-    start                  Start specified PostgreSQL server
-    stop                   Stop specific (running) PostgreSQL server
+    get-path               One of: bin, data, log, runtime
     install                Install specified PostgreSQL version
+    install-service        Install service (daemon), e.g., systemd
     ls                     List what versions of PostgreSQL are installed
     ls-remote              List what versions of PostgreSQL are available
-    get-data-path          Get data path, i.e., where pg_hba and postgres.conf are for specified PostgreSQL version
-    install-service        Install service (daemon), e.g., systemd
+    start                  Start specified PostgreSQL server
+    stop                   Stop specific (running) PostgreSQL server
+
 
 #### Global options
 
