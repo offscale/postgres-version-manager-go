@@ -65,7 +65,7 @@ func main() {
 			log.Fatal(err)
 		}
 	case args.Ls != nil:
-		if err = pvm.LsSubcommand(err, args); err != nil {
+		if err = pvm.LsSubcommand(args); err != nil {
 			log.Fatal(err)
 		}
 	case args.LsRemote != nil:

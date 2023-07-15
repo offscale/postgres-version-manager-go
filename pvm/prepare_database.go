@@ -4,17 +4,13 @@
 package pvm
 
 import (
-	"context"
 	"database/sql"
-	"errors"
 	"fmt"
+	"github.com/lib/pq"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"time"
-
-	"github.com/lib/pq"
 )
 
 const (
@@ -87,7 +83,7 @@ func defaultCreateDatabase(port uint32, username, password, database string) (er
 		return err
 	}
 	if !rows.Next() {
-		fmt.Println(fmt.Sprintf("CREATE DATABASE %s", database))
+		fmt.Printf("CREATE DATABASE %s\n", database)
 		if _, err := db.Exec(fmt.Sprintf("CREATE DATABASE %s", database)); err != nil {
 			return errorCustomDatabase(database, err)
 		}
@@ -112,6 +108,7 @@ func connectionClose(db io.Closer, err error) error {
 	return err
 }
 
+/*
 func healthCheckDatabaseOrTimeout(config ConfigStruct) error {
 	healthCheckSignal := make(chan bool)
 
@@ -157,6 +154,7 @@ func healthCheckDatabase(port uint32, database, username, password string) (err 
 
 	return nil
 }
+*/
 
 func openDatabaseConnection(port uint32, username string, password string, database string) (*pq.Connector, error) {
 	conn, err := pq.NewConnector(fmt.Sprintf("host=localhost port=%d user=%s password=%s dbname=%s sslmode=disable",

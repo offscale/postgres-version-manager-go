@@ -317,12 +317,12 @@ type Metadata struct {
 	} `xml:"versioning"`
 }
 
-func getVersionsFromMaven(binaryRepositoryURL string) (error, []string) {
+func getVersionsFromMaven(binaryRepositoryURL string) ([]string, error) {
 	var metadata Metadata
 	{
 		resp, err := http.Get(binaryRepositoryURL + "/io/zonky/test/postgres/embedded-postgres-binaries-bom/maven-metadata.xml")
 		if err != nil {
-			return err, nil
+			return nil, err
 		}
 		defer func(Body io.ReadCloser) {
 			if err := Body.Close(); err != nil {
@@ -330,9 +330,12 @@ func getVersionsFromMaven(binaryRepositoryURL string) (error, []string) {
 			}
 		}(resp.Body)
 		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return nil, err
+		}
 		if err := xml.Unmarshal(body, &metadata); err != nil {
-			return err, nil
+			return nil, err
 		}
 	}
-	return nil, metadata.Versioning.Versions.Version
+	return metadata.Versioning.Versions.Version, nil
 }

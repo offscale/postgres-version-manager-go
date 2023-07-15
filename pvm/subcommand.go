@@ -24,7 +24,7 @@ func GetPathSubcommand(directoryToFind string, config ConfigStruct) (string, err
 	case "runtime":
 		return config.RuntimePath, nil
 	default:
-		return "", fmt.Errorf("Unsupported path \"%s\"; choose one of: bin, data, log, runtime\n", directoryToFind)
+		return "", fmt.Errorf("usupported path \"%s\"; choose one of: bin, data, log, runtime", directoryToFind)
 	}
 }
 
@@ -84,18 +84,19 @@ WantedBy=multi-user.target
 	}
 }
 
-func LsSubcommand(err error, args Args) error {
+func LsSubcommand(args Args) error {
 	var dirs []os.DirEntry
-	dirs, err = os.ReadDir(args.VersionManagerRoot)
-	if err != nil {
-		log.Fatal(err)
+	var e error
+	dirs, e = os.ReadDir(args.VersionManagerRoot)
+	if e != nil {
+		log.Fatal(e)
 	}
 	for _, dir := range dirs {
 		if dir.Name() != "downloads" && dir.IsDir() && unicode.IsDigit(rune(dir.Name()[0])) {
 			fmt.Println(dir.Name())
 		}
 	}
-	return err
+	return e
 }
 
 func LsRemoteSubcommand(args Args) error {
@@ -106,7 +107,7 @@ func LsRemoteSubcommand(args Args) error {
 		}
 	} else {
 		if versionsFromMaven == nil {
-			if err, versionsFromMaven = getVersionsFromMaven(args.BinaryRepositoryURL); err != nil {
+			if versionsFromMaven, err = getVersionsFromMaven(args.BinaryRepositoryURL); err != nil {
 				return err
 			}
 		}

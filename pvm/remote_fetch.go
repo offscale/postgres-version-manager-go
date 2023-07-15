@@ -146,8 +146,6 @@ func extractArchiveToDir(archiveFilePath string, destinationFolderPath string) e
 			if err = os.Chmod(name, hdr.FileInfo().Mode()); err != nil {
 				return err
 			}
-		case tar.TypeRegA:
-			fmt.Println("TypeRegA: " + name)
 		case tar.TypeLink:
 			fmt.Println("TypeLink: " + name)
 		case tar.TypeSymlink:

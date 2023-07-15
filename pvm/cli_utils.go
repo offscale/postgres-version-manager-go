@@ -1,7 +1,6 @@
 package pvm
 
 import (
-	"errors"
 	"fmt"
 	"path"
 )
@@ -21,13 +20,13 @@ func SetVersionAndDirectories(args *Args, userHomeDir string) error {
 			args.PostgresVersion = PostgresVersions[NumberOfPostgresVersions-1]
 		} else {
 			var err error
-			if err, versionsFromMaven = getVersionsFromMaven(args.BinaryRepositoryURL); err != nil {
+			if versionsFromMaven, err = getVersionsFromMaven(args.BinaryRepositoryURL); err != nil {
 				return err
 			}
 			args.PostgresVersion = versionsFromMaven[len(versionsFromMaven)-1]
 		}
 	} else if !isValidVersion(args.PostgresVersion) {
-		return errors.New(fmt.Sprintf("invalid/unsupported PostgreSQL version: %s\n", args.PostgresVersion))
+		return fmt.Errorf("invalid/unsupported PostgreSQL version: %s", args.PostgresVersion)
 	}
 
 	// If not provided, use $HOME/postgres-version-manager-go/$POSTGRES_VERSION/
@@ -50,7 +49,7 @@ func SetVersionAndDirectories(args *Args, userHomeDir string) error {
 func PostgresVersionFromLocalOrGlobal(localOptionPostgresVersion string, postgresVersion string) (string, error) {
 	if localOptionPostgresVersion != "" {
 		if localOptionPostgresVersion != "latest" && !isValidVersion(localOptionPostgresVersion) {
-			return "", errors.New(fmt.Sprintf("invalid/unsupported PostgreSQL version: %s\n", localOptionPostgresVersion))
+			return "", fmt.Errorf("invalid/unsupported PostgreSQL version: %s", localOptionPostgresVersion)
 		}
 		return localOptionPostgresVersion, nil
 	}
