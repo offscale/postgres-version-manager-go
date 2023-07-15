@@ -67,5 +67,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.10"
+	return "pvm 0.0.12"
 }
