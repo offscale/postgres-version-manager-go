@@ -12,6 +12,7 @@ func SetDefaultsFromEnvironment(args *Args, userHomeDir string) {
 	args.DataPath = path.Join(args.BinariesPath, "data")
 	args.RuntimePath = path.Join(args.BinariesPath, "run")
 	args.LogsPath = path.Join(args.BinariesPath, "logs")
+	args.ConfigFile = path.Join(args.VersionManagerRoot, "pvm-config.json")
 }
 
 func SetVersionAndDirectories(args *Args, userHomeDir string) error {

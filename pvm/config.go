@@ -4,7 +4,7 @@ var versionsFromMaven []string = nil
 
 // ConfigStruct originally from github.com/fergusstrange/embedded-postgres@v1.20.0/config.go
 type ConfigStruct struct {
-	PostgresVersion     string `arg:"--postgres-version,env:POSTGRES_VERSION" default:"latest"`
+	PostgresVersion     string `arg:"--postgres-version,env:POSTGRES_VERSION" default:"latest" json:"-"`
 	Port                uint32 `arg:"-p,env:PGPORT" default:"5432"`
 	Database            string `arg:"-d,env:POSTGRES_DATABASE" default:"database"`
 	Username            string `arg:"-u,env:POSTGRES_USERNAME" default:"username"`
@@ -16,6 +16,8 @@ type ConfigStruct struct {
 	LogsPath            string `arg:"--logs-path,env:LOGS_PATH"`
 	Locale              string `arg:"--locale,env:LC_ALL" default:"en_US.UTF-8"`
 	BinaryRepositoryURL string `arg:"--binary-repository-url,env:BINARY_REPOSITORY_URL" default:"https://repo1.maven.org/maven2"`
+	ConfigFile          string `arg:"-c,--config" json:"-"`
+	NoConfigRw          bool   `arg:"--no-config" json:"-"`
 }
 
 type EnvCmd struct{}
@@ -67,5 +69,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.12"
+	return "pvm 0.0.13"
 }

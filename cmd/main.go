@@ -7,8 +7,7 @@ import (
 	"path"
 
 	"github.com/alexflint/go-arg"
-
-	"postgres-version-manager-go/pvm"
+	"offscale/postgres-version-manager-go/pvm"
 )
 
 func main() {
@@ -45,6 +44,8 @@ func main() {
 	if args.PostgresVersion == "latest" {
 		log.Fatalln("latest")
 	}
+
+	var NonConfigAlteringSubcommand bool = args.Env != nil || args.Ls != nil || args.LsRemote != nil || args.Stop != nil
 
 	switch {
 	case args.Env != nil:
@@ -83,5 +84,11 @@ func main() {
 		}
 	default:
 		log.Fatal("missing subcommand")
+	}
+
+	if !args.NoConfigRw && !NonConfigAlteringSubcommand {
+		if err = pvm.SaveConfig(args); err != nil {
+			log.Fatal(err)
+		}
 	}
 }

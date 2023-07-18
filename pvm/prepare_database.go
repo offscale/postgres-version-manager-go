@@ -6,11 +6,12 @@ package pvm
 import (
 	"database/sql"
 	"fmt"
-	"github.com/lib/pq"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/lib/pq"
 )
 
 const (
