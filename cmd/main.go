@@ -7,7 +7,8 @@ import (
 	"path"
 
 	"github.com/alexflint/go-arg"
-	"offscale/postgres-version-manager-go/pvm"
+
+	"github.com/offscale/postgres-version-manager-go/pvm"
 )
 
 func main() {

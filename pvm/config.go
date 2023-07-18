@@ -16,9 +16,9 @@ type ConfigStruct struct {
 	LogsPath            string `arg:"--logs-path,env:LOGS_PATH"`
 	Locale              string `arg:"--locale,env:LC_ALL" default:"en_US.UTF-8"`
 	BinaryRepositoryURL string `arg:"--binary-repository-url,env:BINARY_REPOSITORY_URL" default:"https://repo1.maven.org/maven2"`
-	ConfigFile          string `arg:"-c,--config" json:"-"`
-	NoConfigRw          bool   `arg:"--no-config" json:"-"`
 }
+
+type ConfigStructs []ConfigStruct
 
 type EnvCmd struct{}
 
@@ -53,6 +53,8 @@ type StopCmd struct {
 
 type Args struct {
 	ConfigStruct
+	ConfigFile     string             `arg:"-c,--config" json:"-"`
+	NoConfigRw     bool               `arg:"--no-config" json:"-"`
 	NoRemote       bool               `arg:"--no-remote" default:"false" help:"Disable HTTPS calls for everything except 'install'"`
 	Env            *EnvCmd            `arg:"subcommand:env" help:"Print out database connection string"`
 	GetPath        *GetPathCmd        `arg:"subcommand:get-path" help:"One of: bin, data, log, runtime"`
