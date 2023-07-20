@@ -21,7 +21,6 @@ func main() {
 	pvm.SetDefaultsFromEnvironment(&args, userHomeDir)
 	cacheLocation := path.Join(args.VersionManagerRoot, "downloads")
 
-	fmt.Println("---------------------------")
 	arg.MustParse(&args)
 	var fieldToNonDefaultValue map[string]interface{} = pvm.FieldAndValueWhenNonDefaultValue(args.ConfigStruct)
 
@@ -30,6 +29,8 @@ func main() {
 		switch {
 		case args.Install != nil:
 			return args.Install.PostgresVersion
+		case args.Ping != nil:
+			return args.Ping.PostgresVersion
 		case args.Start != nil:
 			return args.Start.PostgresVersion
 		case args.Stop != nil:
@@ -89,6 +90,10 @@ func main() {
 		if err = pvm.LsRemoteSubcommand(args); err != nil {
 			log.Fatal(err)
 		}
+	case args.Ping != nil:
+		if err = pvm.PingSubcommand(args.ConfigStruct); err != nil {
+			log.Fatal(err)
+		}
 	case args.Start != nil:
 		if err = pvm.StartSubcommand(args, cacheLocation); err != nil {
 			log.Fatal(err)
@@ -99,7 +104,7 @@ func main() {
 			log.Fatal(err)
 		}
 	default:
-		log.Fatal("missing subcommand")
+		log.Fatal("missing subcommand, use `--help` to see which subcommand are available")
 	}
 
 	if !args.NoConfigWrite && !nonConfigAlteringSubcommand {

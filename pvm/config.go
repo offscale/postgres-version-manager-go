@@ -9,7 +9,7 @@ type ConfigStruct struct {
 	Database            string `arg:"-d,env:POSTGRES_DATABASE" default:"database"`
 	Username            string `arg:"-u,env:POSTGRES_USERNAME" default:"username"`
 	Password            string `arg:"env:POSTGRES_PASSWORD" default:"password"`
-	VersionManagerRoot  string `arg:"env:VERSION_MANAGER_ROOT"`
+	VersionManagerRoot  string `arg:"--version-manager-root,env:VERSION_MANAGER_ROOT" placeholder:"VERSION_MANAGER_ROOT"`
 	RuntimePath         string `arg:"--runtime-path,env:RUNTIME_PATH"`
 	DataPath            string `arg:"--data-path,env:PGDATA"`
 	BinariesPath        string `arg:"--binary-path,env:BINARY_PATH"`
@@ -42,6 +42,9 @@ type LsCmd struct{}
 
 type LsRemoteCmd struct{}
 
+type PingCmd struct {
+	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
+}
 type StartCmd struct {
 	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
 	NoInstall       bool   `arg:"--no-install" default:"false" help:"Inverts default of installing nonexistent version"`
@@ -54,9 +57,9 @@ type StopCmd struct {
 type Args struct {
 	ConfigStruct
 
-	ConfigFile    string `arg:"-c,--config" help:"Config filepath to use" json:"-"`
-	NoConfigRead  bool   `arg:"--no-config-read" default:"false" help:"Do not read to config file" json:"-"`
-	NoConfigWrite bool   `arg:"--no-config-write" default:"false" help:"Do not write to config file" json:"-"`
+	ConfigFile    string `arg:"-c,--config" help:"Config filepath to use"`
+	NoConfigRead  bool   `arg:"--no-config-read" default:"false" help:"Do not read the config file"`
+	NoConfigWrite bool   `arg:"--no-config-write" default:"false" help:"Do not write to config file"`
 	NoRemote      bool   `arg:"--no-remote" default:"false" help:"Disable HTTPS calls for everything except 'install'"`
 
 	Env            *EnvCmd            `arg:"subcommand:env" help:"Print out database connection string"`
@@ -65,6 +68,7 @@ type Args struct {
 	InstallService *InstallServiceCmd `arg:"subcommand:install-service" help:"Install service (daemon), e.g., systemd"`
 	Ls             *LsCmd             `arg:"subcommand:ls" help:"List what versions of PostgreSQL are installed"`
 	LsRemote       *LsRemoteCmd       `arg:"subcommand:ls-remote" help:"List what versions of PostgreSQL are available"`
+	Ping           *PingCmd           `arg:"subcommand:ping" help:"Confirm server is online and auth works"`
 	Start          *StartCmd          `arg:"subcommand:start" help:"Start specified PostgreSQL server"`
 	Stop           *StopCmd           `arg:"subcommand:stop" help:"Stop specific (running) PostgreSQL server"`
 }
@@ -74,5 +78,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.14"
+	return "pvm 0.0.15"
 }

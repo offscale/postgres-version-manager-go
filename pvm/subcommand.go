@@ -1,6 +1,7 @@
 package pvm
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -115,6 +116,26 @@ func LsRemoteSubcommand(args Args) error {
 			fmt.Println(version)
 		}
 	}
+	return nil
+}
+
+func PingSubcommand(config ConfigStruct) error {
+	conn, err := openDatabaseConnection(config.Port, config.Username, config.Password, config.Database)
+	if err != nil {
+		return err
+	}
+
+	db := sql.OpenDB(conn)
+	defer func() {
+		if err = connectionClose(db, err); err != nil {
+			panic(err)
+		}
+	}()
+
+	if _, err := db.Query("SELECT 1"); err != nil {
+		return err
+	}
+
 	return nil
 }
 

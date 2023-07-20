@@ -109,54 +109,6 @@ func connectionClose(db io.Closer, err error) error {
 	return err
 }
 
-/*
-func healthCheckDatabaseOrTimeout(config ConfigStruct) error {
-	healthCheckSignal := make(chan bool)
-
-	defer close(healthCheckSignal)
-
-	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Second*10)
-
-	defer cancelFunc()
-
-	go func() {
-		for timeout.Err() == nil {
-			if err := healthCheckDatabase(config.Port, config.Database, config.Username, config.Password); err != nil {
-				continue
-			}
-			healthCheckSignal <- true
-
-			break
-		}
-	}()
-
-	select {
-	case <-healthCheckSignal:
-		return nil
-	case <-timeout.Done():
-		return errors.New("timed out waiting for database to become available")
-	}
-}
-
-func healthCheckDatabase(port uint32, database, username, password string) (err error) {
-	conn, err := openDatabaseConnection(port, username, password, database)
-	if err != nil {
-		return err
-	}
-
-	db := sql.OpenDB(conn)
-	defer func() {
-		err = connectionClose(db, err)
-	}()
-
-	if _, err := db.Query("SELECT 1"); err != nil {
-		return err
-	}
-
-	return nil
-}
-*/
-
 func openDatabaseConnection(port uint32, username string, password string, database string) (*pq.Connector, error) {
 	conn, err := pq.NewConnector(fmt.Sprintf("host=localhost port=%d user=%s password=%s dbname=%s sslmode=disable",
 		port,

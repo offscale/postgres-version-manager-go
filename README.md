@@ -13,7 +13,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
 ## Usage
 
     PostgreSQL version manager
-    Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--versionmanagerroot VERSIONMANAGERROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--config CONFIG] [--no-config] [--no-remote] <command> [<args>]
+    Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--version-manager-root VERSION_MANAGER_ROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--config CONFIG] [--no-config-read] [--no-config-write] [--no-remote] <command> [<args>]
     
     Commands:
     env                    Print out database connection string
@@ -22,6 +22,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     install-service        Install service (daemon), e.g., systemd
     ls                     List what versions of PostgreSQL are installed
     ls-remote              List what versions of PostgreSQL are available
+    ping                   Confirm server is online and auth works
     start                  Start specified PostgreSQL server
     stop                   Stop specific (running) PostgreSQL server
 
@@ -34,7 +35,7 @@ Common to all subcommands
     --database DATABASE, -d DATABASE [default: database, env: POSTGRES_DATABASE]
     --username USERNAME, -u USERNAME [default: username, env: POSTGRES_USERNAME]
     --password PASSWORD [default: password, env: POSTGRES_PASSWORD]
-    --versionmanagerroot VERSIONMANAGERROOT [default: $HOME/postgres-version-manager, env: VERSION_MANAGER_ROOT]
+    --version-manager-root VERSION_MANAGER_ROOT [default: $HOME/postgres-version-manager, env: VERSION_MANAGER_ROOT]
     --runtime-path RUNTIME-PATH [default: $HOME/postgres-version-manager/latest/run, env: RUNTIME_PATH]
     --data-path DATA-PATH [default: $HOME/postgres-version-manager/latest/data, env: PGDATA]
     --binary-path BINARY-PATH [default: $HOME/postgres-version-manager/latest, env: BINARY_PATH]
@@ -43,7 +44,8 @@ Common to all subcommands
     --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
     --config CONFIG, -c CONFIG
     Config filepath to use [default: $HOME/postgres-version-manager/pvm-config.json]
-    --no-config            Do not read/write to config file [default: false]
+    --no-config-read       Do not read the config file [default: false]
+    --no-config-write      Do not write to config file [default: false]
     --no-remote            Disable HTTPS calls for everything except 'install' [default: false]
     --help, -h             display this help and exit
     --version              display version and exit
@@ -95,6 +97,15 @@ List what versions of PostgreSQL are installed
 List what versions of PostgreSQL are available
 
     Usage: pvm-go ls-remote
+
+### `ping`
+
+Confirm server is online and auth works
+
+    Usage: pvm-go ping [POSTGRES_VERSION]
+    
+    Positional arguments:
+    POSTGRES_VERSION
 
 ### `get-data-path`
 

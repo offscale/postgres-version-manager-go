@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 )
 
 // SaveConfig will only perform write operations if the file is nonexistent or contains different values
@@ -110,11 +111,20 @@ func FieldAndValueWhenNonDefaultValue(configStruct ConfigStruct) map[string]inte
 }
 
 func SetField(obj interface{}, name string, value interface{}) error {
-	structValue := reflect.ValueOf(obj)
-	if structValue.Kind() == reflect.Ptr {
-		structValue = structValue.Elem()
+	// TODO: Handle - Int  Int8  Int16  Int32  Uint  Uint8  Uint16  Uint32  Uintptr  Float32  Float64  Complex64
+	// TODO: Handle - Complex128  Array  Chan  Func  Map  Pointer  Slice  Struct  UnsafePointer
+	// Current support: interface, string, int64, uint64
+	var err error
+	if obj == nil {
+		return errors.New("object is nil")
 	}
 
+	structValue := reflect.ValueOf(obj)
+	if structValue.Kind() != reflect.Ptr || !structValue.Elem().IsValid() {
+		return fmt.Errorf("object is not a pointer to valid struct")
+	}
+
+	structValue = structValue.Elem()
 	structFieldValue := structValue.FieldByName(name)
 
 	if !structFieldValue.IsValid() {
@@ -125,10 +135,45 @@ func SetField(obj interface{}, name string, value interface{}) error {
 		return fmt.Errorf("cannot set %s field value", name)
 	}
 
-	structFieldType := structFieldValue.Type()
 	val := reflect.ValueOf(value)
-	if structFieldType != val.Type() {
-		return fmt.Errorf("provided value type didn't match obj field type")
+	kind := structFieldValue.Kind()
+
+	if kind >= reflect.Int && kind <= reflect.Int64 {
+		var i int64
+		var ok bool
+		i, ok = value.(int64)
+		if !ok {
+			if i, err = strconv.ParseInt(value.(string), 0, 64); err != nil {
+				return err
+			}
+		}
+		if structFieldValue.OverflowInt(i) {
+			return fmt.Errorf("provided int value is not valid for field type [%v]", structFieldValue.Type().Kind())
+		}
+
+		structFieldValue.SetInt(i)
+		return nil
+	}
+
+	if kind >= reflect.Uint && kind <= reflect.Uint64 {
+		var i uint64
+		var ok bool
+		i, ok = value.(uint64)
+		if !ok {
+			if i, err = strconv.ParseUint(value.(string), 0, 64); err != nil {
+				return err
+			}
+		}
+		if structFieldValue.OverflowUint(i) {
+			return fmt.Errorf("provided uint value is not valid for field type [%v]", structFieldValue.Type().Kind())
+		}
+
+		structFieldValue.SetUint(i)
+		return nil
+	}
+
+	if structFieldValue.Type() != val.Type() {
+		return fmt.Errorf("provided value type [%v] didn't match obj field type [%v]", val.Type(), structFieldValue.Type())
 	}
 
 	structFieldValue.Set(val)
