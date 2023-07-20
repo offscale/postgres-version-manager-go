@@ -7,7 +7,6 @@ import (
 	"path"
 
 	"github.com/alexflint/go-arg"
-
 	"github.com/offscale/postgres-version-manager-go/pvm"
 )
 
@@ -22,7 +21,9 @@ func main() {
 	pvm.SetDefaultsFromEnvironment(&args, userHomeDir)
 	cacheLocation := path.Join(args.VersionManagerRoot, "downloads")
 
+	fmt.Println("---------------------------")
 	arg.MustParse(&args)
+	var fieldToNonDefaultValue map[string]interface{} = pvm.FieldAndValueWhenNonDefaultValue(args.ConfigStruct)
 
 	// Logic to prioritise POSTGRES_VERSION as a positional
 	if args.PostgresVersion, err = pvm.PostgresVersionFromLocalOrGlobal(func() string {
@@ -46,7 +47,21 @@ func main() {
 		log.Fatalln("latest")
 	}
 
-	var NonConfigAlteringSubcommand bool = args.Env != nil || args.Ls != nil || args.LsRemote != nil || args.Stop != nil
+	var nonConfigAlteringSubcommand bool = args.Env != nil || args.Ls != nil || args.LsRemote != nil || args.Stop != nil
+	if !args.NoConfigRead && (!nonConfigAlteringSubcommand || args.Env != nil) {
+		var configStruct *pvm.ConfigStruct
+		if configStruct, err = pvm.GetConfigFromFileOfConfigs(args); err != nil {
+			log.Fatal(err)
+		}
+		if configStruct != nil {
+			for field, value := range fieldToNonDefaultValue {
+				if err = pvm.SetField(configStruct, field, value); err != nil {
+					log.Fatal(err)
+				}
+			}
+			args.ConfigStruct = *configStruct
+		}
+	}
 
 	switch {
 	case args.Env != nil:
@@ -87,7 +102,7 @@ func main() {
 		log.Fatal("missing subcommand")
 	}
 
-	if !args.NoConfigRw && !NonConfigAlteringSubcommand {
+	if !args.NoConfigWrite && !nonConfigAlteringSubcommand {
 		if err = pvm.SaveConfig(args); err != nil {
 			log.Fatal(err)
 		}

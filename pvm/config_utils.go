@@ -26,6 +26,13 @@ func SaveConfig(args Args) error {
 		if err = jsonParser.Decode(&configs); err != nil {
 			return err
 		}
+		defer func(jsonFile *os.File) {
+			err := jsonFile.Close()
+			if err != nil {
+				panic(err)
+			}
+		}(jsonFile)
+
 		var readConfig *ConfigStruct
 		var readConfigPosition int
 		for idx, configStruct := range configs {
@@ -50,6 +57,82 @@ func SaveConfig(args Args) error {
 		return err
 	}
 	return os.WriteFile(args.ConfigFile, jsonBytes, 0600)
+}
+
+func GetConfigFromFileOfConfigs(args Args) (*ConfigStruct, error) {
+	var err error
+	if _, err = os.Stat(args.ConfigFile); err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var jsonFile *os.File
+	if jsonFile, err = os.Open(args.ConfigFile); err != nil {
+		return nil, err
+	}
+	defer func(jsonFile *os.File) {
+		err := jsonFile.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(jsonFile)
+	jsonParser := json.NewDecoder(jsonFile)
+	var configs ConfigStructs
+	err = jsonParser.Decode(&configs)
+	if err != nil {
+		return nil, err
+	}
+	for _, configStruct := range configs {
+		if configStruct.PostgresVersion == args.PostgresVersion {
+			return &configStruct, err
+		}
+	}
+	return nil, nil
+}
+
+func FieldAndValueWhenNonDefaultValue(configStruct ConfigStruct) map[string]interface{} {
+	val := reflect.ValueOf(configStruct)
+	fieldToValue := make(map[string]interface{})
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		defaultTag := field.Tag.Get("default")
+		fieldValue := fmt.Sprintf("%v", val.Field(i).Interface())
+
+		if defaultTag != fieldValue && defaultTag != "" {
+			fieldToValue[field.Name] = fieldValue
+		}
+	}
+
+	return fieldToValue
+}
+
+func SetField(obj interface{}, name string, value interface{}) error {
+	structValue := reflect.ValueOf(obj)
+	if structValue.Kind() == reflect.Ptr {
+		structValue = structValue.Elem()
+	}
+
+	structFieldValue := structValue.FieldByName(name)
+
+	if !structFieldValue.IsValid() {
+		return fmt.Errorf("no such field: %s in struct", name)
+	}
+
+	if !structFieldValue.CanSet() {
+		return fmt.Errorf("cannot set %s field value", name)
+	}
+
+	structFieldType := structFieldValue.Type()
+	val := reflect.ValueOf(value)
+	if structFieldType != val.Type() {
+		return fmt.Errorf("provided value type didn't match obj field type")
+	}
+
+	structFieldValue.Set(val)
+	return nil
 }
 
 func (configs *ConfigStructs) UnmarshalJSON(bytes []byte) error {

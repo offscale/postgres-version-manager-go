@@ -53,9 +53,12 @@ type StopCmd struct {
 
 type Args struct {
 	ConfigStruct
-	ConfigFile     string             `arg:"-c,--config" json:"-"`
-	NoConfigRw     bool               `arg:"--no-config" json:"-"`
-	NoRemote       bool               `arg:"--no-remote" default:"false" help:"Disable HTTPS calls for everything except 'install'"`
+
+	ConfigFile    string `arg:"-c,--config" help:"Config filepath to use" json:"-"`
+	NoConfigRead  bool   `arg:"--no-config-read" default:"false" help:"Do not read to config file" json:"-"`
+	NoConfigWrite bool   `arg:"--no-config-write" default:"false" help:"Do not write to config file" json:"-"`
+	NoRemote      bool   `arg:"--no-remote" default:"false" help:"Disable HTTPS calls for everything except 'install'"`
+
 	Env            *EnvCmd            `arg:"subcommand:env" help:"Print out database connection string"`
 	GetPath        *GetPathCmd        `arg:"subcommand:get-path" help:"One of: bin, data, log, runtime"`
 	Install        *InstallCmd        `arg:"subcommand:install" help:"Install specified PostgreSQL version"`
@@ -71,5 +74,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.13"
+	return "pvm 0.0.14"
 }

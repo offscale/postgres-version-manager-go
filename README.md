@@ -13,7 +13,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
 ## Usage
 
     PostgreSQL version manager
-    Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--versionmanagerroot VERSIONMANAGERROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--no-remote] <command> [<args>]
+    Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--versionmanagerroot VERSIONMANAGERROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--config CONFIG] [--no-config] [--no-remote] <command> [<args>]
     
     Commands:
     env                    Print out database connection string
@@ -24,7 +24,6 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     ls-remote              List what versions of PostgreSQL are available
     start                  Start specified PostgreSQL server
     stop                   Stop specific (running) PostgreSQL server
-
 
 #### Global options
 
@@ -42,8 +41,12 @@ Common to all subcommands
     --logs-path LOGS-PATH [default: $HOME/postgres-version-manager/latest/logs, env: LOGS_PATH]
     --locale LOCALE [default: en_US.UTF-8, env: LC_ALL]
     --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
+    --config CONFIG, -c CONFIG
+    Config filepath to use [default: $HOME/postgres-version-manager/pvm-config.json]
+    --no-config            Do not read/write to config file [default: false]
     --no-remote            Disable HTTPS calls for everything except 'install' [default: false]
     --help, -h             display this help and exit
+    --version              display version and exit
 
 ### `env`
 
