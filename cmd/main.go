@@ -18,11 +18,11 @@ func main() {
 	if userHomeDir, err = os.UserHomeDir(); err != nil {
 		log.Fatal(err)
 	}
-	pvm.SetDefaultsFromEnvironment(&args, userHomeDir)
+	pvm.SetDefaultsFromEnvironment(&args, &userHomeDir)
 	cacheLocation := path.Join(args.VersionManagerRoot, "downloads")
 
 	arg.MustParse(&args)
-	var fieldToNonDefaultValue map[string]interface{} = pvm.FieldAndValueWhenNonDefaultValue(args.ConfigStruct)
+	var fieldToNonDefaultValue map[string]interface{} = pvm.FieldAndValueWhenNonDefaultValue(&args.ConfigStruct)
 
 	// Logic to prioritise POSTGRES_VERSION as a positional
 	if args.PostgresVersion, err = pvm.PostgresVersionFromLocalOrGlobal(func() string {
@@ -41,7 +41,7 @@ func main() {
 	}(), args.PostgresVersion); err != nil {
 		log.Fatal(err)
 	}
-	if err = pvm.SetVersionAndDirectories(&args, userHomeDir); err != nil {
+	if err = pvm.SetVersionAndDirectories(&args); err != nil {
 		log.Fatal(err)
 	}
 	if args.PostgresVersion == "latest" {
@@ -49,9 +49,9 @@ func main() {
 	}
 
 	var nonConfigAlteringSubcommand bool = args.Env != nil || args.Ls != nil || args.LsRemote != nil || args.Stop != nil
-	if !args.NoConfigRead && (!nonConfigAlteringSubcommand || args.Env != nil) {
+	if !args.NoConfigRead && (!nonConfigAlteringSubcommand || args.Env != nil || args.Stop != nil) {
 		var configStruct *pvm.ConfigStruct
-		if configStruct, err = pvm.GetConfigFromFileOfConfigs(args); err != nil {
+		if configStruct, err = pvm.GetConfigFromFileOfConfigs(&args); err != nil {
 			log.Fatal(err)
 		}
 		if configStruct != nil {
@@ -66,40 +66,41 @@ func main() {
 
 	switch {
 	case args.Env != nil:
-		fmt.Println(pvm.EnvSubcommand(args.ConfigStruct))
+		fmt.Println(pvm.EnvSubcommand(&args.ConfigStruct))
 	case args.GetPath != nil:
 		var pathLocation string
-		if pathLocation, err = pvm.GetPathSubcommand(args.GetPath.DirectoryToFind, args.ConfigStruct); err != nil {
+		if pathLocation, err = pvm.GetPathSubcommand(&args.GetPath.DirectoryToFind, &args.ConfigStruct); err != nil {
 			log.Fatal(err)
 		} else {
 			fmt.Println(pathLocation)
 		}
 	case args.Install != nil:
-		if err = pvm.InstallSubcommand(args, cacheLocation); err != nil {
+		if err = pvm.InstallSubcommand(&args, &cacheLocation); err != nil {
 			log.Fatal(err)
 		}
 	case args.InstallService != nil:
-		if err = pvm.InstallServiceSubcommand(args); err != nil {
+		if err = pvm.InstallServiceSubcommand(&args); err != nil {
 			log.Fatal(err)
 		}
 	case args.Ls != nil:
-		if err = pvm.LsSubcommand(args); err != nil {
+		if err = pvm.LsSubcommand(&args); err != nil {
 			log.Fatal(err)
 		}
 	case args.LsRemote != nil:
-		if err = pvm.LsRemoteSubcommand(args); err != nil {
+		if err = pvm.LsRemoteSubcommand(&args); err != nil {
 			log.Fatal(err)
 		}
 	case args.Ping != nil:
-		if err = pvm.PingSubcommand(args.ConfigStruct); err != nil {
+		if err = pvm.PingSubcommand(&args.ConfigStruct); err != nil {
 			log.Fatal(err)
 		}
 	case args.Start != nil:
-		if err = pvm.StartSubcommand(args, cacheLocation); err != nil {
+		if err = pvm.StartSubcommand(&args, &cacheLocation); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Printf("Started PostgreSQL server, access via:\n%s\n", pvm.EnvSubcommand(args.ConfigStruct))
+		fmt.Printf("Started PostgreSQL server, access via:\n%s\n", pvm.EnvSubcommand(&args.ConfigStruct))
 	case args.Stop != nil:
+		fmt.Printf("args: %v\n", args)
 		if err = pvm.StopPostgres(&args.ConfigStruct); err != nil {
 			log.Fatal(err)
 		}
@@ -108,7 +109,7 @@ func main() {
 	}
 
 	if !args.NoConfigWrite && !nonConfigAlteringSubcommand {
-		if err = pvm.SaveConfig(args); err != nil {
+		if err = pvm.SaveConfig(&args); err != nil {
 			log.Fatal(err)
 		}
 	}

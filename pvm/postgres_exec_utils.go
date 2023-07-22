@@ -10,7 +10,7 @@ import (
 )
 
 func startPostgres(config *ConfigStruct) error {
-	postgresBinary := filepath.Join(config.BinariesPath, "bin", "pg_ctl")
+	postgresBinary := filepath.Join(config.BinariesPath, "pg_ctl")
 	postgresProcess := exec.Command(postgresBinary, "start", "-w",
 		"-D", config.DataPath,
 		"-o", fmt.Sprintf(`"-p %d"`, config.Port))
@@ -34,7 +34,8 @@ func startPostgres(config *ConfigStruct) error {
 }
 
 func StopPostgres(config *ConfigStruct) error {
-	postgresBinary := filepath.Join(config.BinariesPath, "bin", "pg_ctl")
+	fmt.Printf("config: %v\n", config)
+	postgresBinary := filepath.Join(config.BinariesPath, "pg_ctl")
 	postgresProcess := exec.Command(postgresBinary, "stop", "-w",
 		"-D", config.DataPath,
 		"-o", fmt.Sprintf(`"-p %d"`, config.Port))

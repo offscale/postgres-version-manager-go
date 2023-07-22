@@ -2,20 +2,21 @@ package pvm
 
 import (
 	"fmt"
-	"path"
+	"path/filepath"
 )
 
-func SetDefaultsFromEnvironment(args *Args, userHomeDir string) {
+func SetDefaultsFromEnvironment(args *Args, userHomeDir *string) {
 	args.PostgresVersion = "latest"
-	args.VersionManagerRoot = path.Join(userHomeDir, "postgres-version-manager")
-	args.BinariesPath = path.Join(args.VersionManagerRoot, args.PostgresVersion)
-	args.DataPath = path.Join(args.BinariesPath, "data")
-	args.RuntimePath = path.Join(args.BinariesPath, "run")
-	args.LogsPath = path.Join(args.BinariesPath, "logs")
-	args.ConfigFile = path.Join(args.VersionManagerRoot, "pvm-config.json")
+	args.VersionManagerRoot = filepath.Join(*userHomeDir, "postgres-version-manager")
+	versionedRoot := filepath.Join(args.VersionManagerRoot, args.PostgresVersion)
+	args.DataPath = filepath.Join(versionedRoot, "data")
+	args.RuntimePath = filepath.Join(versionedRoot, "run")
+	args.LogsPath = filepath.Join(versionedRoot, "logs")
+	args.BinariesPath = filepath.Join(versionedRoot, "bin")
+	args.ConfigFile = filepath.Join(args.VersionManagerRoot, "pvm-config.json")
 }
 
-func SetVersionAndDirectories(args *Args, userHomeDir string) error {
+func SetVersionAndDirectories(args *Args) error {
 	if args.PostgresVersion == "latest" {
 		if args.NoRemote {
 			args.PostgresVersion = PostgresVersions[NumberOfPostgresVersions-1]
@@ -31,18 +32,19 @@ func SetVersionAndDirectories(args *Args, userHomeDir string) error {
 	}
 
 	// If not provided, use $HOME/postgres-version-manager-go/$POSTGRES_VERSION/
-	latestBinariesPath := path.Join(args.VersionManagerRoot, "latest")
-	if latestBinariesPath == args.BinariesPath {
-		args.BinariesPath = path.Join(userHomeDir, "postgres-version-manager", args.PostgresVersion)
-		if path.Join(latestBinariesPath, "data") == args.DataPath {
-			args.DataPath = path.Join(args.BinariesPath, "data")
-		}
-		if path.Join(latestBinariesPath, "run") == args.BinariesPath {
-			args.RuntimePath = path.Join(args.BinariesPath, "run")
-		}
-		if path.Join(latestBinariesPath, "logs") == args.LogsPath {
-			args.LogsPath = path.Join(args.BinariesPath, "logs")
-		}
+	latestVersionedRoot := filepath.Join(args.VersionManagerRoot, "latest")
+	specificVersionedRoot := filepath.Join(args.VersionManagerRoot, args.PostgresVersion)
+	if filepath.Join(latestVersionedRoot, "bin") == args.BinariesPath {
+		args.BinariesPath = filepath.Join(specificVersionedRoot, "bin")
+	}
+	if filepath.Join(latestVersionedRoot, "data") == args.DataPath {
+		args.DataPath = filepath.Join(specificVersionedRoot, "data")
+	}
+	if filepath.Join(latestVersionedRoot, "run") == args.RuntimePath {
+		args.RuntimePath = filepath.Join(specificVersionedRoot, "run")
+	}
+	if filepath.Join(latestVersionedRoot, "logs") == args.LogsPath {
+		args.LogsPath = filepath.Join(specificVersionedRoot, "logs")
 	}
 	return nil
 }

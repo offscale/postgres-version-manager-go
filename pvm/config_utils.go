@@ -10,7 +10,7 @@ import (
 )
 
 // SaveConfig will only perform write operations if the file is nonexistent or contains different values
-func SaveConfig(args Args) error {
+func SaveConfig(args *Args) error {
 	var err error
 	var jsonBytes []byte
 
@@ -60,7 +60,7 @@ func SaveConfig(args Args) error {
 	return os.WriteFile(args.ConfigFile, jsonBytes, 0600)
 }
 
-func GetConfigFromFileOfConfigs(args Args) (*ConfigStruct, error) {
+func GetConfigFromFileOfConfigs(args *Args) (*ConfigStruct, error) {
 	var err error
 	if _, err = os.Stat(args.ConfigFile); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -93,8 +93,8 @@ func GetConfigFromFileOfConfigs(args Args) (*ConfigStruct, error) {
 	return nil, nil
 }
 
-func FieldAndValueWhenNonDefaultValue(configStruct ConfigStruct) map[string]interface{} {
-	val := reflect.ValueOf(configStruct)
+func FieldAndValueWhenNonDefaultValue(configStruct *ConfigStruct) map[string]interface{} {
+	val := reflect.ValueOf(*configStruct)
 	fieldToValue := make(map[string]interface{})
 
 	for i := 0; i < val.NumField(); i++ {

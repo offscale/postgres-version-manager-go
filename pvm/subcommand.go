@@ -10,12 +10,12 @@ import (
 	"unicode"
 )
 
-func EnvSubcommand(config ConfigStruct) string {
+func EnvSubcommand(config *ConfigStruct) string {
 	return fmt.Sprintf("postgresql://%s:%s@%s:%d/%s", config.Username, config.Password, "localhost", config.Port, config.Database)
 }
 
-func GetPathSubcommand(directoryToFind string, config ConfigStruct) (string, error) {
-	switch directoryToFind {
+func GetPathSubcommand(directoryToFind *string, config *ConfigStruct) (string, error) {
+	switch *directoryToFind {
 	case "bin":
 		return config.BinariesPath, nil
 	case "data":
@@ -29,16 +29,16 @@ func GetPathSubcommand(directoryToFind string, config ConfigStruct) (string, err
 	}
 }
 
-func InstallSubcommand(args Args, cacheLocation string) error {
+func InstallSubcommand(args *Args, cacheLocation *string) error {
 	var err error
 	postgresVersion := args.PostgresVersion
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.LogsPath); err != nil {
 		return err
 	}
-	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot, false)()
+	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, *cacheLocation, args.VersionManagerRoot, false)()
 }
 
-func InstallServiceSubcommand(args Args) error {
+func InstallServiceSubcommand(args *Args) error {
 	var err error
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.LogsPath); err != nil {
 		return err
@@ -47,22 +47,33 @@ func InstallServiceSubcommand(args Args) error {
 		systemd :=
 			fmt.Sprintf(`[Unit]
 Description=PostgreSQL %s database server
-Documentation=man:postgres(1)
-After=network-online.target
-Wants=network-online.target
+After=network.target
 
 [Service]
-Type=notify
+Type=forking
+
 User=postgres
-ExecStart=%s/postgres -D %s
-ExecReload=/bin/kill -HUP $MAINPID
-KillMode=mixed
-KillSignal=SIGINT
-TimeoutSec=infinity
+Group=postgres
+
+OOMScoreAdjust=-1000
+Environment=PG_OOM_ADJUST_FILE=/proc/self/oom_score_adj
+Environment=PG_OOM_ADJUST_VALUE=0
+
+Environment=PGSTARTTIMEOUT=270
+
+Environment=PGDATA=%s
+Environment=PGPORT=%d
+
+
+ExecStart=%s/pg_ctl start -D ${PGDATA} -s -w -t ${PGSTARTTIMEOUT}
+ExecStop=%s/pg_ctl stop -D ${PGDATA} -s -m fast
+ExecReload=%s/pg_ctl reload -D ${PGDATA} -s
+
+TimeoutSec=300
 
 [Install]
 WantedBy=multi-user.target
-`, args.PostgresVersion, args.BinariesPath, args.DataPath)
+`, args.PostgresVersion, args.DataPath, args.Port, args.BinariesPath, args.BinariesPath, args.BinariesPath)
 		var f *os.File
 
 		f, err = os.Create(args.InstallService.Systemd.ServiceInstallPath)
@@ -85,22 +96,22 @@ WantedBy=multi-user.target
 	}
 }
 
-func LsSubcommand(args Args) error {
+func LsSubcommand(args *Args) error {
 	var dirs []os.DirEntry
-	var e error
-	dirs, e = os.ReadDir(args.VersionManagerRoot)
-	if e != nil {
-		log.Fatal(e)
+	var err error
+	dirs, err = os.ReadDir(args.VersionManagerRoot)
+	if err != nil {
+		log.Fatal(err)
 	}
 	for _, dir := range dirs {
 		if dir.Name() != "downloads" && dir.IsDir() && unicode.IsDigit(rune(dir.Name()[0])) {
 			fmt.Println(dir.Name())
 		}
 	}
-	return e
+	return err
 }
 
-func LsRemoteSubcommand(args Args) error {
+func LsRemoteSubcommand(args *Args) error {
 	var err error
 	if args.NoRemote {
 		for _, version := range PostgresVersions {
@@ -119,7 +130,7 @@ func LsRemoteSubcommand(args Args) error {
 	return nil
 }
 
-func PingSubcommand(config ConfigStruct) error {
+func PingSubcommand(config *ConfigStruct) error {
 	conn, err := openDatabaseConnection(config.Port, config.Username, config.Password, config.Database)
 	if err != nil {
 		return err
@@ -139,13 +150,12 @@ func PingSubcommand(config ConfigStruct) error {
 	return nil
 }
 
-func StartSubcommand(args Args, cacheLocation string) error {
+func StartSubcommand(args *Args, cacheLocation *string) error {
 	var err error
-	fmt.Printf("args.LogsPath: \"%s\"\n", args.LogsPath)
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.RuntimePath, args.LogsPath); err != nil {
 		return err
 	}
-	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, cacheLocation, args.VersionManagerRoot, args.Start.NoInstall)(); err != nil {
+	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, *cacheLocation, args.VersionManagerRoot, args.Start.NoInstall)(); err != nil {
 		return err
 	}
 	if _, err := os.Stat(path.Join(args.DataPath, "pg_wal")); errors.Is(err, os.ErrNotExist) {
@@ -156,8 +166,5 @@ func StartSubcommand(args Args, cacheLocation string) error {
 	if err = startPostgres(&args.ConfigStruct); err != nil {
 		return err
 	}
-	if err = defaultCreateDatabase(args.Port, args.Username, args.Password, args.Database); err != nil {
-		return err
-	}
-	return nil
+	return defaultCreateDatabase(args.Port, args.Username, args.Password, args.Database)
 }

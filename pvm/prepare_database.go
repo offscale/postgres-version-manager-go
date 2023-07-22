@@ -36,7 +36,7 @@ func defaultInitDatabase(binaryExtractLocation, runtimePath, pgDataDir, username
 		args = append(args, fmt.Sprintf("--locale=%s", locale))
 	}
 
-	postgresInitDBBinary := filepath.Join(binaryExtractLocation, "bin", "initdb")
+	postgresInitDBBinary := filepath.Join(binaryExtractLocation, "initdb")
 	postgresInitDBProcess := exec.Command(postgresInitDBBinary, args...)
 	postgresInitDBProcess.Stderr = logger
 	postgresInitDBProcess.Stdout = logger
