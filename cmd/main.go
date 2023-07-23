@@ -104,6 +104,8 @@ func main() {
 		if err = pvm.StopPostgres(&args.ConfigStruct); err != nil {
 			log.Fatal(err)
 		}
+	case args.Uri != nil:
+		fmt.Println(pvm.UriSubcommand(&args.ConfigStruct))
 	default:
 		log.Fatal("missing subcommand, use `--help` to see which subcommand are available")
 	}

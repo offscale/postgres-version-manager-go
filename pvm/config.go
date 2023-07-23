@@ -54,6 +54,8 @@ type StopCmd struct {
 	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
 }
 
+type UriCmd struct{}
+
 type Args struct {
 	ConfigStruct
 
@@ -62,7 +64,7 @@ type Args struct {
 	NoConfigWrite bool   `arg:"--no-config-write" default:"false" help:"Do not write to config file"`
 	NoRemote      bool   `arg:"--no-remote" default:"false" help:"Disable HTTPS calls for everything except 'install'"`
 
-	Env            *EnvCmd            `arg:"subcommand:env" help:"Print out database connection string"`
+	Env            *EnvCmd            `arg:"subcommand:env" help:"Print out associated environment variables"`
 	GetPath        *GetPathCmd        `arg:"subcommand:get-path" help:"One of: bin, data, log, runtime"`
 	Install        *InstallCmd        `arg:"subcommand:install" help:"Install specified PostgreSQL version"`
 	InstallService *InstallServiceCmd `arg:"subcommand:install-service" help:"Install service (daemon), e.g., systemd"`
@@ -71,6 +73,7 @@ type Args struct {
 	Ping           *PingCmd           `arg:"subcommand:ping" help:"Confirm server is online and auth works"`
 	Start          *StartCmd          `arg:"subcommand:start" help:"Start specified PostgreSQL server"`
 	Stop           *StopCmd           `arg:"subcommand:stop" help:"Stop specific (running) PostgreSQL server"`
+	Uri            *UriCmd            `arg:"subcommand:uri" help:"Print out database connection string"`
 }
 
 func (Args) Description() string {
@@ -78,5 +81,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.16"
+	return "pvm 0.0.17"
 }

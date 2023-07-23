@@ -16,7 +16,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--version-manager-root VERSION_MANAGER_ROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--config CONFIG] [--no-config-read] [--no-config-write] [--no-remote] <command> [<args>]
     
     Commands:
-    env                    Print out database connection string
+    env                    Print out associated environment variables
     get-path               One of: bin, data, log, runtime
     install                Install specified PostgreSQL version
     install-service        Install service (daemon), e.g., systemd
@@ -25,6 +25,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     ping                   Confirm server is online and auth works
     start                  Start specified PostgreSQL server
     stop                   Stop specific (running) PostgreSQL server
+    uri                    Print out database connection string
 
 #### Global options
 
@@ -38,7 +39,7 @@ Common to all subcommands
     --version-manager-root VERSION_MANAGER_ROOT [default: $HOME/postgres-version-manager, env: VERSION_MANAGER_ROOT]
     --runtime-path RUNTIME-PATH [default: $HOME/postgres-version-manager/latest/run, env: RUNTIME_PATH]
     --data-path DATA-PATH [default: $HOME/postgres-version-manager/latest/data, env: PGDATA]
-    --binary-path BINARY-PATH [default: $HOME/postgres-version-manager/latest, env: BINARY_PATH]
+    --binary-path BINARY-PATH [default: $HOME/postgres-version-manager/latest/bin, env: BINARY_PATH]
     --logs-path LOGS-PATH [default: $HOME/postgres-version-manager/latest/logs, env: LOGS_PATH]
     --locale LOCALE [default: en_US.UTF-8, env: LC_ALL]
     --binary-repository-url BINARY-REPOSITORY-URL [default: https://repo1.maven.org/maven2, env: BINARY_REPOSITORY_URL]
@@ -52,7 +53,7 @@ Common to all subcommands
 
 ### `env`
 
-Print out database connection string
+Print out associated environment variables
 
     Usage: pvm-go env
 
@@ -133,6 +134,12 @@ Install systemd service
     
     Options:
     --service-install-path SERVICE-INSTALL-PATH [default: /etc/systemd/system/postgresql.service]
+
+### uri
+
+Print out database connection string
+
+    Usage: pvm-go uri
 
 ---
 

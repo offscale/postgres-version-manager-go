@@ -3,6 +3,7 @@ package pvm
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 )
 
 func SetDefaultsFromEnvironment(args *Args, userHomeDir *string) {
@@ -57,4 +58,15 @@ func PostgresVersionFromLocalOrGlobal(localOptionPostgresVersion string, postgre
 		return localOptionPostgresVersion, nil
 	}
 	return postgresVersion, nil
+}
+
+func parseEnvFromArgTag(argTag string) (string, error) {
+	for _, word := range strings.FieldsFunc(argTag, func(c rune) bool {
+		return c == ','
+	}) {
+		if strings.HasPrefix(word, "env:") {
+			return word[4:], nil
+		}
+	}
+	return "", fmt.Errorf("no env tag found in struct arg tag")
 }

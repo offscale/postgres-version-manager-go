@@ -7,11 +7,25 @@ import (
 	"log"
 	"os"
 	"path"
+	"reflect"
 	"unicode"
 )
 
 func EnvSubcommand(config *ConfigStruct) string {
-	return fmt.Sprintf("postgresql://%s:%s@%s:%d/%s", config.Username, config.Password, "localhost", config.Port, config.Database)
+	val := reflect.ValueOf(*config)
+	typ := reflect.TypeOf(*config)
+	var envStr string = ""
+	for i := 0; i < val.NumField(); i++ {
+		valField := val.Field(i)
+		typField := typ.Field(i)
+		argTag := typField.Tag.Get("arg")
+		envName, err := parseEnvFromArgTag(argTag)
+		if err != nil {
+			envName = typField.Name
+		}
+		envStr = fmt.Sprintf("%s%s=%v\n", envStr, envName, valField.Interface())
+	}
+	return envStr
 }
 
 func GetPathSubcommand(directoryToFind *string, config *ConfigStruct) (string, error) {
@@ -167,4 +181,8 @@ func StartSubcommand(args *Args, cacheLocation *string) error {
 		return err
 	}
 	return defaultCreateDatabase(args.Port, args.Username, args.Password, args.Database)
+}
+
+func UriSubcommand(config *ConfigStruct) string {
+	return fmt.Sprintf("postgresql://%s:%s@%s:%d/%s", config.Username, config.Password, "localhost", config.Port, config.Database)
 }
