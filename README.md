@@ -57,6 +57,16 @@ Print out associated environment variables
 
     Usage: pvm-go env
 
+To export to your shell on POSIX, UNIX, Linux:
+```sh
+export $(pvm-go env | xargs -L 1)
+```
+
+Or on Windows Batch:
+```cmd
+FOR /F "tokens=4*" %%G IN ('pvm-go env') DO SET %%G 
+```
+
 ### `start`
 
 Start specified PostgreSQL server
@@ -135,7 +145,7 @@ Install systemd service
     Options:
     --service-install-path SERVICE-INSTALL-PATH [default: /etc/systemd/system/postgresql.service]
 
-### uri
+### `uri`
 
 Print out database connection string
 

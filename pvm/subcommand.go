@@ -23,7 +23,7 @@ func EnvSubcommand(config *ConfigStruct) string {
 		if err != nil {
 			envName = typField.Name
 		}
-		envStr = fmt.Sprintf("%s%s=%v\n", envStr, envName, valField.Interface())
+		envStr = fmt.Sprintf("%s%s=%c%v%c\n", envStr, envName, CmdQuoteChar, valField.Interface(), CmdQuoteChar)
 	}
 	return envStr
 }
