@@ -31,7 +31,9 @@ type InstallCmd struct {
 }
 
 type InstallServiceForSystemdCmd struct {
+	Group              string `arg:"--group" default:"postgres"`
 	ServiceInstallPath string `arg:"--service-install-path" default:"/etc/systemd/system/postgresql.service"`
+	User               string `arg:"--user" default:"postgres"`
 }
 
 type InstallServiceCmd struct {
@@ -45,6 +47,11 @@ type LsRemoteCmd struct{}
 type PingCmd struct {
 	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
 }
+
+type ReloadCmd struct {
+	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
+}
+
 type StartCmd struct {
 	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
 	NoInstall       bool   `arg:"--no-install" default:"false" help:"Inverts default of installing nonexistent version"`
@@ -71,6 +78,7 @@ type Args struct {
 	Ls             *LsCmd             `arg:"subcommand:ls" help:"List what versions of PostgreSQL are installed"`
 	LsRemote       *LsRemoteCmd       `arg:"subcommand:ls-remote" help:"List what versions of PostgreSQL are available"`
 	Ping           *PingCmd           `arg:"subcommand:ping" help:"Confirm server is online and auth works"`
+	Reload         *ReloadCmd         `arg:"subcommand:reload" help:"Reload specified PostgreSQL server"`
 	Start          *StartCmd          `arg:"subcommand:start" help:"Start specified PostgreSQL server"`
 	Stop           *StopCmd           `arg:"subcommand:stop" help:"Stop specific (running) PostgreSQL server"`
 	Uri            *UriCmd            `arg:"subcommand:uri" help:"Print out database connection string"`
@@ -81,5 +89,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.17"
+	return "pvm 0.0.18"
 }

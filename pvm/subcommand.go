@@ -66,8 +66,8 @@ After=network.target
 [Service]
 Type=forking
 
-User=postgres
-Group=postgres
+User=%s
+Group=%s
 
 OOMScoreAdjust=-1000
 Environment=PG_OOM_ADJUST_FILE=/proc/self/oom_score_adj
@@ -87,7 +87,7 @@ TimeoutSec=300
 
 [Install]
 WantedBy=multi-user.target
-`, args.PostgresVersion, args.DataPath, args.Port, args.BinariesPath, args.BinariesPath, args.BinariesPath)
+`, args.PostgresVersion, args.InstallService.Systemd.User, args.InstallService.Systemd.Group, args.DataPath, args.Port, args.BinariesPath, args.BinariesPath, args.BinariesPath)
 		var f *os.File
 
 		f, err = os.Create(args.InstallService.Systemd.ServiceInstallPath)

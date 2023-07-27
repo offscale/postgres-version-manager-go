@@ -14,8 +14,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
 
     PostgreSQL version manager
     Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--version-manager-root VERSION_MANAGER_ROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--config CONFIG] [--no-config-read] [--no-config-write] [--no-remote] <command> [<args>]
-    
-    Commands:
+
     env                    Print out associated environment variables
     get-path               One of: bin, data, log, runtime
     install                Install specified PostgreSQL version
@@ -23,6 +22,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     ls                     List what versions of PostgreSQL are installed
     ls-remote              List what versions of PostgreSQL are available
     ping                   Confirm server is online and auth works
+    reload                 Reload specified PostgreSQL server
     start                  Start specified PostgreSQL server
     stop                   Stop specific (running) PostgreSQL server
     uri                    Print out database connection string
@@ -140,10 +140,12 @@ Install service (daemon), e.g., systemd
 
 Install systemd service
 
-    Usage: pvm-go install-service systemd [--service-install-path SERVICE-INSTALL-PATH]
+    Usage: pvm-go install-service systemd [--group GROUP] [--service-install-path SERVICE-INSTALL-PATH] [--user USER]
     
     Options:
+    --group GROUP [default: postgres]
     --service-install-path SERVICE-INSTALL-PATH [default: /etc/systemd/system/postgresql.service]
+    --user USER [default: postgres]
 
 ### `uri`
 
