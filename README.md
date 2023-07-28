@@ -67,6 +67,15 @@ Or on Windows Batch:
 FOR /F "tokens=4*" %%G IN ('pvm-go env') DO SET %%G 
 ```
 
+### `reload`
+
+Reload specified PostgreSQL server
+
+    Usage: pvm-go reload [POSTGRES_VERSION]
+    
+    Positional arguments:
+    POSTGRES_VERSION
+
 ### `start`
 
 Start specified PostgreSQL server

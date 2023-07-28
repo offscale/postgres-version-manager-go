@@ -31,6 +31,8 @@ func main() {
 			return args.Install.PostgresVersion
 		case args.Ping != nil:
 			return args.Ping.PostgresVersion
+		case args.Reload != nil:
+			return args.Reload.PostgresVersion
 		case args.Start != nil:
 			return args.Start.PostgresVersion
 		case args.Stop != nil:
