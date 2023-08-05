@@ -11,8 +11,8 @@ import (
 
 func ReloadPostgres(config *ConfigStruct) error {
 	var err error
-	postgresBinary := filepath.Join(config.BinariesPath, "pg_ctl")
-	postgresProcess := exec.Command(postgresBinary, "reload",
+	pgCtlBinary := filepath.Join(config.BinariesPath, "pg_ctl")
+	postgresProcess := exec.Command(pgCtlBinary, "reload",
 		"-D", config.DataPath, "-s")
 
 	var syncedLog *syncedLogger
@@ -35,8 +35,8 @@ func ReloadPostgres(config *ConfigStruct) error {
 }
 
 func startPostgres(config *ConfigStruct) error {
-	postgresBinary := filepath.Join(config.BinariesPath, "pg_ctl")
-	postgresProcess := exec.Command(postgresBinary, "start", "-w",
+	pgCtlBinary := filepath.Join(config.BinariesPath, "pg_ctl")
+	postgresProcess := exec.Command(pgCtlBinary, "start", "-w",
 		"-D", config.DataPath,
 		"-o", fmt.Sprintf(`"-p %d"`, config.Port))
 
@@ -59,8 +59,8 @@ func startPostgres(config *ConfigStruct) error {
 }
 
 func StopPostgres(config *ConfigStruct) error {
-	postgresBinary := filepath.Join(config.BinariesPath, "pg_ctl")
-	postgresProcess := exec.Command(postgresBinary, "stop", "-w",
+	pgCtlBinary := filepath.Join(config.BinariesPath, "pg_ctl")
+	postgresProcess := exec.Command(pgCtlBinary, "stop", "-w",
 		"-D", config.DataPath,
 		"-o", fmt.Sprintf(`"-p %d"`, config.Port))
 

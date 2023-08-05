@@ -36,8 +36,14 @@ type InstallServiceForSystemdCmd struct {
 	User               string `arg:"--user" default:"postgres"`
 }
 
+type InstallServiceForWindowsCmd struct {
+	Name        string `arg:"--service-name" default:"PostgreSQL"`
+	Description string `arg:"--service-description" default:"open-source relational database management system"`
+}
+
 type InstallServiceCmd struct {
-	Systemd *InstallServiceForSystemdCmd `arg:"subcommand:systemd" help:"Install systemd service"`
+	Systemd        *InstallServiceForSystemdCmd `arg:"subcommand:systemd" help:"Install systemd service"`
+	WindowsService *InstallServiceForWindowsCmd `arg:"subcommand:windows-service" help:"Install Windows Service"`
 }
 
 type LsCmd struct{}

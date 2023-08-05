@@ -8,7 +8,10 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"runtime"
 	"unicode"
+
+	"github.com/lib/pq"
 )
 
 func EnvSubcommand(config *ConfigStruct) string {
@@ -57,64 +60,26 @@ func InstallServiceSubcommand(args *Args) error {
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.LogsPath); err != nil {
 		return err
 	}
+	const isWindows bool = runtime.GOOS == "windows"
 	if args.InstallService.Systemd != nil {
-		systemd :=
-			fmt.Sprintf(`[Unit]
-Description=PostgreSQL %s database server
-After=network.target
-
-[Service]
-Type=forking
-
-User=%s
-Group=%s
-
-OOMScoreAdjust=-1000
-Environment=PG_OOM_ADJUST_FILE=/proc/self/oom_score_adj
-Environment=PG_OOM_ADJUST_VALUE=0
-
-Environment=PGSTARTTIMEOUT=270
-
-Environment=PGDATA=%s
-Environment=PGPORT=%d
-
-
-ExecStart=%s/pg_ctl start -D ${PGDATA} -s -w -t ${PGSTARTTIMEOUT}
-ExecStop=%s/pg_ctl stop -D ${PGDATA} -s -m fast
-ExecReload=%s/pg_ctl reload -D ${PGDATA} -s
-
-TimeoutSec=300
-
-[Install]
-WantedBy=multi-user.target
-`, args.PostgresVersion, args.InstallService.Systemd.User, args.InstallService.Systemd.Group, args.DataPath, args.Port, args.BinariesPath, args.BinariesPath, args.BinariesPath)
-		var f *os.File
-
-		f, err = os.Create(args.InstallService.Systemd.ServiceInstallPath)
-
-		if err != nil {
-			return err
+		if isWindows {
+			return fmt.Errorf("systemd is not available on %s\n", runtime.GOOS)
 		}
-
-		defer func(f *os.File) {
-			err = f.Close()
-			if err != nil {
-				panic(err)
-			}
-		}(f)
-		_, err = f.WriteString(systemd)
-
-		return err
+		return systemdInstall(args)
+	} else if args.InstallService.WindowsService != nil {
+		if !isWindows {
+			return fmt.Errorf("Windows Service is not available on %s\n", runtime.GOOS)
+		}
+		return windowsServiceInstall(args)
 	} else {
-		return fmt.Errorf("NotImplementedError: systemd is the only service available for install")
+		return fmt.Errorf("NotImplementedError")
 	}
 }
 
 func LsSubcommand(args *Args) error {
 	var dirs []os.DirEntry
 	var err error
-	dirs, err = os.ReadDir(args.VersionManagerRoot)
-	if err != nil {
+	if dirs, err = os.ReadDir(args.VersionManagerRoot); err != nil {
 		log.Fatal(err)
 	}
 	for _, dir := range dirs {
@@ -145,8 +110,9 @@ func LsRemoteSubcommand(args *Args) error {
 }
 
 func PingSubcommand(config *ConfigStruct) error {
-	conn, err := openDatabaseConnection(config.Port, config.Username, config.Password, config.Database)
-	if err != nil {
+	var err error
+	var conn *pq.Connector
+	if conn, err = openDatabaseConnection(config.Port, config.Username, config.Password, config.Database); err != nil {
 		return err
 	}
 
@@ -157,11 +123,8 @@ func PingSubcommand(config *ConfigStruct) error {
 		}
 	}()
 
-	if _, err := db.Query("SELECT 1"); err != nil {
-		return err
-	}
-
-	return nil
+	_, err = db.Query("SELECT 1")
+	return err
 }
 
 func StartSubcommand(args *Args, cacheLocation *string) error {
@@ -172,7 +135,7 @@ func StartSubcommand(args *Args, cacheLocation *string) error {
 	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, *cacheLocation, args.VersionManagerRoot, args.Start.NoInstall)(); err != nil {
 		return err
 	}
-	if _, err := os.Stat(path.Join(args.DataPath, "pg_wal")); errors.Is(err, os.ErrNotExist) {
+	if _, err = os.Stat(path.Join(args.DataPath, "pg_wal")); errors.Is(err, os.ErrNotExist) {
 		if err = defaultInitDatabase(args.BinariesPath, args.RuntimePath, args.DataPath, args.Username, args.Password, args.Locale, os.Stdout); err != nil {
 			return err
 		}
