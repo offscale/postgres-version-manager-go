@@ -72,13 +72,10 @@ func InstallServiceSubcommand(args *Args) error {
 	const isWindows bool = runtime.GOOS == "windows"
 	if args.InstallService.Systemd != nil {
 		if isWindows {
-			return fmt.Errorf("systemd is not available on %s\n", runtime.GOOS)
+			return fmt.Errorf("systemd is not available on %s", runtime.GOOS)
 		}
 		return systemdInstall(args)
 	} else if args.InstallService.WindowsService != nil {
-		if !isWindows {
-			return fmt.Errorf("Windows Service is not available on %s\n", runtime.GOOS)
-		}
 		return windowsServiceInstall(args)
 	} else {
 		return fmt.Errorf("NotImplementedError")
