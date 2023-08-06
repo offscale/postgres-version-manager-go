@@ -15,6 +15,8 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     PostgreSQL version manager
     Usage: pvm-go [--postgres-version POSTGRES-VERSION] [--port PORT] [--database DATABASE] [--username USERNAME] [--password PASSWORD] [--version-manager-root VERSION_MANAGER_ROOT] [--runtime-path RUNTIME-PATH] [--data-path DATA-PATH] [--binary-path BINARY-PATH] [--logs-path LOGS-PATH] [--locale LOCALE] [--binary-repository-url BINARY-REPOSITORY-URL] [--config CONFIG] [--no-config-read] [--no-config-write] [--no-remote] <command> [<args>]
 
+    Commands:
+    download               Download specified PostgreSQL version
     env                    Print out associated environment variables
     get-path               One of: bin, data, log, runtime
     install                Install specified PostgreSQL version
@@ -26,6 +28,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     start                  Start specified PostgreSQL server
     stop                   Stop specific (running) PostgreSQL server
     uri                    Print out database connection string
+
 
 #### Global options
 
@@ -50,6 +53,15 @@ Common to all subcommands
     --no-remote            Disable HTTPS calls for everything except 'install' [default: false]
     --help, -h             display this help and exit
     --version              display version and exit
+
+### `download`
+
+Download specified PostgreSQL version
+
+    Usage: pvm-go download [POSTGRES_VERSION]
+
+    Positional arguments:
+    POSTGRES_VERSION
 
 ### `env`
 
@@ -144,6 +156,7 @@ Install service (daemon), e.g., systemd
 
     Commands:
     systemd                Install systemd service
+    windows-service        Install Windows Service
 
 #### `systemd`
 
@@ -155,6 +168,16 @@ Install systemd service
     --group GROUP [default: postgres]
     --service-install-path SERVICE-INSTALL-PATH [default: /etc/systemd/system/postgresql.service]
     --user USER [default: postgres]
+
+#### `windows-service`
+
+Install Windows Service
+
+    Usage: pvm-go install-service windows-service [--service-name SERVICE-NAME] [--service-description SERVICE-DESCRIPTION]
+    
+    Options:
+    --service-name SERVICE-NAME [default: PostgreSQL]
+    --service-description SERVICE-DESCRIPTION [default: open-source relational database management system]
 
 ### `uri`
 

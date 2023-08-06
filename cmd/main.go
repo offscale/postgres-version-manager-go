@@ -27,6 +27,8 @@ func main() {
 	// Logic to prioritise POSTGRES_VERSION as a positional
 	if args.PostgresVersion, err = pvm.PostgresVersionFromLocalOrGlobal(func() string {
 		switch {
+		case args.Download != nil:
+			return args.Download.PostgresVersion
 		case args.Install != nil:
 			return args.Install.PostgresVersion
 		case args.Ping != nil:
@@ -68,6 +70,8 @@ func main() {
 	var res string
 
 	switch {
+	case args.Download != nil:
+		err = pvm.DownloadSubcommand(&args, &cacheLocation)
 	case args.Env != nil:
 		res = pvm.EnvSubcommand(&args.ConfigStruct)
 	case args.GetPath != nil:

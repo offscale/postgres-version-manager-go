@@ -20,6 +20,10 @@ type ConfigStruct struct {
 
 type ConfigStructs []ConfigStruct
 
+type DownloadCmd struct {
+	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
+}
+
 type EnvCmd struct{}
 
 type GetPathCmd struct {
@@ -77,6 +81,7 @@ type Args struct {
 	NoConfigWrite bool   `arg:"--no-config-write" default:"false" help:"Do not write to config file"`
 	NoRemote      bool   `arg:"--no-remote" default:"false" help:"Disable HTTPS calls for everything except 'install'"`
 
+	Download       *DownloadCmd       `arg:"subcommand:download" help:"Download specified PostgreSQL version"`
 	Env            *EnvCmd            `arg:"subcommand:env" help:"Print out associated environment variables"`
 	GetPath        *GetPathCmd        `arg:"subcommand:get-path" help:"One of: bin, data, log, runtime"`
 	Install        *InstallCmd        `arg:"subcommand:install" help:"Install specified PostgreSQL version"`
@@ -95,5 +100,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.19"
+	return "pvm 0.0.20"
 }

@@ -14,6 +14,15 @@ import (
 	"github.com/lib/pq"
 )
 
+func DownloadSubcommand(args *Args, cacheLocation *string) error {
+	var err error
+	postgresVersion := args.PostgresVersion
+	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.LogsPath); err != nil {
+		return err
+	}
+	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, *cacheLocation, args.VersionManagerRoot, true, false)()
+}
+
 func EnvSubcommand(config *ConfigStruct) string {
 	val := reflect.ValueOf(*config)
 	typ := reflect.TypeOf(*config)
@@ -52,7 +61,7 @@ func InstallSubcommand(args *Args, cacheLocation *string) error {
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.LogsPath); err != nil {
 		return err
 	}
-	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, *cacheLocation, args.VersionManagerRoot, false)()
+	return downloadExtractIfNonexistent(postgresVersion, args.BinaryRepositoryURL, *cacheLocation, args.VersionManagerRoot, false, false)()
 }
 
 func InstallServiceSubcommand(args *Args) error {
@@ -132,7 +141,7 @@ func StartSubcommand(args *Args, cacheLocation *string) error {
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.RuntimePath, args.LogsPath); err != nil {
 		return err
 	}
-	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, *cacheLocation, args.VersionManagerRoot, args.Start.NoInstall)(); err != nil {
+	if err = downloadExtractIfNonexistent(args.PostgresVersion, args.BinaryRepositoryURL, *cacheLocation, args.VersionManagerRoot, args.Start.NoInstall, args.Start.NoInstall)(); err != nil {
 		return err
 	}
 	if _, err = os.Stat(path.Join(args.DataPath, "pg_wal")); errors.Is(err, os.ErrNotExist) {

@@ -26,7 +26,7 @@ import (
 type RemoteFetchStrategy func() error
 
 //nolint:funlen
-func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy VersionStrategy, cacheLocator CacheLocator, versionManagerRoot string, noInstall bool) RemoteFetchStrategy {
+func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy VersionStrategy, cacheLocator CacheLocator, versionManagerRoot string, noExtract bool, noInstall bool) RemoteFetchStrategy {
 	return func() error {
 		if _, existsAlready := cacheLocator(); existsAlready {
 			return nil
@@ -78,6 +78,9 @@ func defaultRemoteFetchStrategy(remoteFetchHost string, versionStrategy VersionS
 			}
 		}
 
+		if noExtract {
+			return nil
+		}
 		// Extract out the archive to the cache dir:
 		// e.g., 'embedded-postgres-binaries-linux-amd64-15.1.0.txz' to "$HOME"'/postgres-version-manager/downloads/'
 		var tarFilePath string
