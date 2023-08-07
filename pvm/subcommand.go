@@ -69,11 +69,11 @@ func InstallServiceSubcommand(args *Args) error {
 	if err = ensureDirsExist(args.VersionManagerRoot, args.DataPath, args.LogsPath); err != nil {
 		return err
 	}
-	const isWindows bool = runtime.GOOS == "windows"
-	if args.InstallService.Systemd != nil {
-		if isWindows {
-			return fmt.Errorf("systemd is not available on %s", runtime.GOOS)
-		}
+	if runtime.GOOS == "windows" && args.InstallService.WindowsService == nil {
+		return fmt.Errorf("chosen service is not available on Windows")
+	} else if args.InstallService.OpenRc != nil {
+		return openRcInstall(args)
+	} else if args.InstallService.Systemd != nil {
 		return systemdInstall(args)
 	} else if args.InstallService.WindowsService != nil {
 		return windowsServiceInstall(args)

@@ -152,11 +152,24 @@ Get data path, i.e., where pg_hba and postgres.conf are for specified PostgreSQL
 
 Install service (daemon), e.g., systemd
 
-    Usage: pvm-go install-service
+    Usage: pvm-go install-service <command> [<args>]
 
     Commands:
+    openrc                 Install OpenRC service
     systemd                Install systemd service
     windows-service        Install Windows Service
+
+#### `openrc`
+
+Install OpenRC service
+
+    Usage: pvm-go install-service openrc [--group GROUP] [--service-install-path SERVICE-INSTALL-PATH] [--service-install-path SERVICE-INSTALL-PATH] [--user USER]
+    
+    Options:
+    --group GROUP [default: postgres]
+    --service-install-path SERVICE-INSTALL-PATH [default: /etc/conf.d/postgresql]
+    --service-install-path SERVICE-INSTALL-PATH [default: /etc/init.d/postgresql]
+    --user USER [default: postgres]
 
 #### `systemd`
 

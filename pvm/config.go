@@ -34,6 +34,13 @@ type InstallCmd struct {
 	PostgresVersion string `arg:"positional" placeholder:"POSTGRES_VERSION" default:""`
 }
 
+type InstallServiceForOpenRcCmd struct {
+	Group              string `arg:"--group" default:"postgres"`
+	ConfigInstallPath  string `arg:"--service-install-path" default:"/etc/conf.d/postgresql"`
+	ServiceInstallPath string `arg:"--service-install-path" default:"/etc/init.d/postgresql"`
+	User               string `arg:"--user" default:"postgres"`
+}
+
 type InstallServiceForSystemdCmd struct {
 	Group              string `arg:"--group" default:"postgres"`
 	ServiceInstallPath string `arg:"--service-install-path" default:"/etc/systemd/system/postgresql.service"`
@@ -46,6 +53,7 @@ type InstallServiceForWindowsCmd struct {
 }
 
 type InstallServiceCmd struct {
+	OpenRc         *InstallServiceForOpenRcCmd  `arg:"subcommand:openrc" help:"Install OpenRC service"`
 	Systemd        *InstallServiceForSystemdCmd `arg:"subcommand:systemd" help:"Install systemd service"`
 	WindowsService *InstallServiceForWindowsCmd `arg:"subcommand:windows-service" help:"Install Windows Service"`
 }
@@ -100,5 +108,5 @@ func (Args) Description() string {
 }
 
 func (Args) Version() string {
-	return "pvm 0.0.20"
+	return "pvm 0.0.21"
 }
