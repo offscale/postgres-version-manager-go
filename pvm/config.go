@@ -36,7 +36,7 @@ type InstallCmd struct {
 
 type InstallServiceForOpenRcCmd struct {
 	Group              string `arg:"--group" default:"postgres"`
-	ConfigInstallPath  string `arg:"--service-install-path" default:"/etc/conf.d/postgresql"`
+	ConfigInstallPath  string `arg:"--config-install-path" default:"/etc/conf.d/postgresql"`
 	ServiceInstallPath string `arg:"--service-install-path" default:"/etc/init.d/postgresql"`
 	User               string `arg:"--user" default:"postgres"`
 }

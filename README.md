@@ -163,11 +163,11 @@ Install service (daemon), e.g., systemd
 
 Install OpenRC service
 
-    Usage: pvm-go install-service openrc [--group GROUP] [--service-install-path SERVICE-INSTALL-PATH] [--service-install-path SERVICE-INSTALL-PATH] [--user USER]
+    Usage: pvm-go install-service openrc [--group GROUP] [--config-install-path CONFIG-INSTALL-PATH] [--service-install-path SERVICE-INSTALL-PATH] [--user USER]
     
     Options:
     --group GROUP [default: postgres]
-    --service-install-path SERVICE-INSTALL-PATH [default: /etc/conf.d/postgresql]
+    --config-install-path CONFIG-INSTALL-PATH [default: /etc/conf.d/postgresql]
     --service-install-path SERVICE-INSTALL-PATH [default: /etc/init.d/postgresql]
     --user USER [default: postgres]
 
