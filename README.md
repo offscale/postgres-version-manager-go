@@ -20,7 +20,7 @@ Tested on Go 1.20, `git clone` this repo then `go build ./cmd`
     env                    Print out associated environment variables
     get-path               One of: bin, data, log, runtime
     install                Install specified PostgreSQL version
-    install-service        Install service (daemon), e.g., systemd
+    install-service        Install service (daemon), e.g., systemd, openrc, windows-service
     ls                     List what versions of PostgreSQL are installed
     ls-remote              List what versions of PostgreSQL are available
     ping                   Confirm server is online and auth works
@@ -150,7 +150,7 @@ Get data path, i.e., where pg_hba and postgres.conf are for specified PostgreSQL
 
 ### `install-service`
 
-Install service (daemon), e.g., systemd
+Install service (daemon), e.g., systemd, openrc, windows-service
 
     Usage: pvm-go install-service <command> [<args>]
 
