@@ -2,12 +2,15 @@ package pvm
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 )
 
 func SetDefaultsFromEnvironment(args *Args, userHomeDir *string) {
-	args.PostgresVersion = "latest"
+	if args.PostgresVersion == "" {
+		args.PostgresVersion = "latest"
+	}
 	args.VersionManagerRoot = filepath.Join(*userHomeDir, "postgres-version-manager")
 	versionedRoot := filepath.Join(args.VersionManagerRoot, args.PostgresVersion)
 	args.DataPath = filepath.Join(versionedRoot, "data")
@@ -18,7 +21,8 @@ func SetDefaultsFromEnvironment(args *Args, userHomeDir *string) {
 }
 
 func SetVersionAndDirectories(args *Args) error {
-	if args.PostgresVersion == "latest" {
+	var wasLatest bool
+	if wasLatest = args.PostgresVersion == "latest"; wasLatest {
 		if args.NoRemote {
 			args.PostgresVersion = PostgresVersions[NumberOfPostgresVersions-1]
 		} else {
@@ -28,8 +32,6 @@ func SetVersionAndDirectories(args *Args) error {
 			}
 			args.PostgresVersion = versionsFromMaven[len(versionsFromMaven)-1]
 		}
-	} else if !isValidVersion(args.PostgresVersion) {
-		return fmt.Errorf("invalid/unsupported PostgreSQL version: %s", args.PostgresVersion)
 	}
 
 	// If not provided, use $HOME/postgres-version-manager-go/$POSTGRES_VERSION/
@@ -47,13 +49,23 @@ func SetVersionAndDirectories(args *Args) error {
 	if filepath.Join(latestVersionedRoot, "logs") == args.LogsPath {
 		args.LogsPath = filepath.Join(specificVersionedRoot, "logs")
 	}
+
+	if !wasLatest && !isValidVersion(args.PostgresVersion) {
+		if _, err := os.Stat(args.BinariesPath); err != nil {
+			fmt.Printf("Could not find %s\n", args.BinariesPath)
+			return fmt.Errorf("iiii invalid/unsupported PostgreSQL version: %s", args.PostgresVersion)
+		}
+	}
+
 	return nil
 }
 
-func PostgresVersionFromLocalOrGlobal(localOptionPostgresVersion string, postgresVersion string) (string, error) {
+func PostgresVersionFromLocalOrGlobal(localOptionPostgresVersion, postgresVersion, BinariesPath string) (string, error) {
 	if localOptionPostgresVersion != "" {
 		if localOptionPostgresVersion != "latest" && !isValidVersion(localOptionPostgresVersion) {
-			return "", fmt.Errorf("invalid/unsupported PostgreSQL version: %s", localOptionPostgresVersion)
+			if _, err := os.Stat(BinariesPath); err != nil {
+				return "", fmt.Errorf("invalid/unsupported PostgreSQL version: %s", localOptionPostgresVersion)
+			}
 		}
 		return localOptionPostgresVersion, nil
 	}
