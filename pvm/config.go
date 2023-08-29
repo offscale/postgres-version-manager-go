@@ -36,7 +36,7 @@ type InstallCmd struct {
 
 type InstallServiceForOpenRcCmd struct {
 	Group              string `arg:"--group" default:"postgres"`
-	ConfigInstallPath  string `arg:"--service-install-path" default:"/etc/conf.d/postgresql"`
+	ConfigInstallPath  string `arg:"--config-install-path" default:"/etc/conf.d/postgresql"`
 	ServiceInstallPath string `arg:"--service-install-path" default:"/etc/init.d/postgresql"`
 	User               string `arg:"--user" default:"postgres"`
 }
@@ -93,7 +93,7 @@ type Args struct {
 	Env            *EnvCmd            `arg:"subcommand:env" help:"Print out associated environment variables"`
 	GetPath        *GetPathCmd        `arg:"subcommand:get-path" help:"One of: bin, data, log, runtime"`
 	Install        *InstallCmd        `arg:"subcommand:install" help:"Install specified PostgreSQL version"`
-	InstallService *InstallServiceCmd `arg:"subcommand:install-service" help:"Install service (daemon), e.g., systemd"`
+	InstallService *InstallServiceCmd `arg:"subcommand:install-service" help:"Install service (daemon), e.g., systemd, openrc, windows-service"`
 	Ls             *LsCmd             `arg:"subcommand:ls" help:"List what versions of PostgreSQL are installed"`
 	LsRemote       *LsRemoteCmd       `arg:"subcommand:ls-remote" help:"List what versions of PostgreSQL are available"`
 	Ping           *PingCmd           `arg:"subcommand:ping" help:"Confirm server is online and auth works"`
